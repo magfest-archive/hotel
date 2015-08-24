@@ -37,33 +37,36 @@ class Attendee:
     hotel_eligible = Column(Boolean, default=False, admin_only=True)
     hotel_requests = relationship('HotelRequests', backref=backref('attendee', load_on_pending=True), uselist=False)
 
-    @property
-    def shift_prereqs_complete(self):
-        return not self.placeholder and self.food_restrictions and self.shirt_size_marked and self.hotel_requests
-
     @presave_adjustment
     def staffer_hotel_eligibility(self):
         if self.badge_type == c.STAFF_BADGE:
             self.hotel_eligible = True
+
+    @presave_adjustment
+    def staffer_setup_teardown(self):
+        if self.setup_hotel_approved:
+            self.can_work_setup = True
+        if self.teardown_hotel_approved:
+            self.can_work_teardown = True
 
     @property
     def hotel_shifts_required(self):
         return bool(c.SHIFTS_CREATED and self.hotel_nights and self.ribbon != c.DEPT_HEAD_RIBBON and self.takes_shifts)
 
     @property
-    def approved_for_setup(self):
+    def setup_hotel_approved(self):
         hr = self.hotel_requests
         return bool(hr and hr.approved and set(hr.nights_ints).intersection(c.SETUP_NIGHTS))
 
     @property
-    def approved_for_teardown(self):
+    def teardown_hotel_approved(self):
         hr = self.hotel_requests
         return bool(hr and hr.approved and set(hr.nights_ints).intersection(c.TEARDOWN_NIGHTS))
 
     @property
     def shift_prereqs_complete(self):
         return not self.placeholder and self.food_restrictions and self.shirt_size_marked \
-            and (self.badge_type != c.STAFF_BADGE or self.hotel_requests or not c.BEFORE_ROOM_DEADLINE)
+            and (not self.hotel_eligible or self.hotel_requests or not c.BEFORE_ROOM_DEADLINE)
 
     @property
     def hotel_nights(self):
@@ -101,8 +104,8 @@ class HotelRequests(MagModel, NightsMixin):
 
 
 class Room(MagModel, NightsMixin):
-    department = Column(Choice(c.JOB_LOCATION_OPTS))
     notes      = Column(UnicodeText)
+    locked_in  = Column(Boolean, default=True)
     nights     = Column(MultiChoice(c.NIGHT_OPTS))
     created    = Column(UTCDateTime, server_default=utcnow())
     room_assignments = relationship('RoomAssignment', backref='room')

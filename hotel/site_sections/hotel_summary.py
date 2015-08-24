@@ -8,9 +8,9 @@ class Root:
         for hr in session.query(HotelRequests).filter_by(approved=True).options(joinedload(HotelRequests.attendee)).all():
             if hr.setup_teardown and hr.attendee.takes_shifts:
                 reasons = []
-                if hr.attendee.approved_for_setup and not any([shift.job.is_setup for shift in hr.attendee.shifts]):
+                if hr.attendee.setup_hotel_approved and not any([shift.job.is_setup for shift in hr.attendee.shifts]):
                     reasons.append('has no setup shifts')
-                if hr.attendee.approved_for_teardown and not any([shift.job.is_teardown for shift in hr.attendee.shifts]):
+                if hr.attendee.teardown_hotel_approved and not any([shift.job.is_teardown for shift in hr.attendee.shifts]):
                     reasons.append('has no teardown shifts')
                 if reasons:
                     attendees.append([hr.attendee, reasons])

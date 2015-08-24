@@ -1,6 +1,6 @@
 <span style="float:right"><a id="backlink" href="../accounts/homepage">Return Home</a></span>
 
-<h2>{{ departmentName }} Hotel Rooms</h2>
+<h2>Hotel Rooms</h2>
 
 {{ checklistDescription }}
 
@@ -73,12 +73,6 @@
         <b>{{ unconfirmed.length }} haven't filled out<br/>the volunteer checklist</b>
         <div ng-repeat="attendee in lists.unconfirmed">
             <a href="../registration/form?id={{ attendee.id }}">{{ attendee.name }}</a>
-        </div>
-    </td>
-    <td valign="top">
-        <b>{{ assigned_elsewhere.length }} Already Assigned<br/>(in another department)</b>
-        <div ng-repeat="attendee in lists.assigned_elsewhere">
-            <a href="#/attendee/{{ attendee.id }}">{{ attendee.name }}</a>
         </div>
     </td>
     <td valign="top">

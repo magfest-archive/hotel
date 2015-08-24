@@ -11,7 +11,6 @@ angular.module('hotel', ['ngRoute', 'magfest'])
                 assigned: [],
                 unassigned: [],
                 unconfirmed: [],
-                assigned_elsewhere: [],
                 declined: [],
                 all_attendees: []
             },
@@ -57,10 +56,7 @@ angular.module('hotel', ['ngRoute', 'magfest'])
             $http({
                 method: 'post',
                 url: 'unassign_from_room',
-                params: {
-                    attendee_id: attendee_id,
-                    department: $scope.department
-                }
+                params: {attendee_id: attendee_id}
             }).success(Hotel.set).error(errorHandler);
         };
         $scope.deleteRoom = function(room_id) {
@@ -72,10 +68,7 @@ angular.module('hotel', ['ngRoute', 'magfest'])
         };
     })
     .controller('CreateController', function($scope, $http, $location, errorHandler, Hotel) {
-        $scope.room = {
-            department: $scope.department,
-            notes: ''
-        };
+        $scope.room = {notes: ''};
         $scope.nights = [];
         angular.forEach($scope.NIGHTS, function (night) {
             $scope.nights.push(angular.extend({checked: night.core}, night));

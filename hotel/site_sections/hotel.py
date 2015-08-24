@@ -103,12 +103,12 @@ class Root:
             for a in group:
                 writerow(a, a.hotel_requests)
 
-    def assignments(self, session, department):
+    def assignments(self, session):
         if cannot_modify_rooms():
             cherrypy.response.headers['Content-Type'] = 'text/plain'
             return json.dumps({
                 'message': 'Hotel rooms are currently locked in, email {} if you need a last-minute adjustment'.format(c.STAFF_EMAIL),
-                'rooms': [room.to_dict() for room in session.query(Room).filter_by(department=department).all()]
+                'rooms': [room.to_dict() for room in session.query(Room).all()]
             }, indent=4, cls=serializer)
         else:
             attendee = session.admin_attendee()
@@ -117,9 +117,7 @@ class Root:
             day_before = (c.EPOCH - timedelta(days=1)).strftime('%A')
             last_day = c.ESCHATON.strftime('%A')
             return {
-                'department': department,
-                'dump': _hotel_dump(session, department),
-                'department_name': c.JOB_LOCATIONS[int(department)],
+                'dump': _hotel_dump(session),
                 'nights': [{
                     'core': False,
                     'name': three_days_before.lower(),
@@ -153,21 +151,21 @@ class Root:
         params['nights'] = list(filter(bool, [params.pop(night, None) for night in c.NIGHT_NAMES]))
         session.add(session.room(params))
         session.commit()
-        return _hotel_dump(session, params['department'])
+        return _hotel_dump(session)
 
     @ajax
     def edit_room(self, session, **params):
         params['nights'] = list(filter(bool, [params.pop(night, None) for night in c.NIGHT_NAMES]))
         session.room(params)
         session.commit()
-        return _hotel_dump(session, params['department'])
+        return _hotel_dump(session)
 
     @ajax
     def delete_room(self, session, id):
         room = session.room(id)
         session.delete(room)
         session.commit()
-        return _hotel_dump(session, room.department)
+        return _hotel_dump(session)
 
     @ajax
     def assign_to_room(self, session, attendee_id, room_id):
@@ -185,14 +183,14 @@ class Root:
             elif not hr.approved:
                 hr.decline()
             session.commit()
-        return _hotel_dump(session, session.room(room_id).department)
+        return _hotel_dump(session)
 
     @ajax
-    def unassign_from_room(self, session, attendee_id, department):
+    def unassign_from_room(self, session, attendee_id):
         for ra in session.query(RoomAssignment).filter_by(attendee_id=attendee_id).all():
             session.delete(ra)
         session.commit()
-        return _hotel_dump(session, department)
+        return _hotel_dump(session)
 
 
 def _attendee_dict(attendee):
@@ -214,63 +212,44 @@ def _room_dict(session, room):
         'id': room.id,
         'notes': room.notes,
         'nights': room.nights_display,
-        'department': room.department,
         'attendees': [_attendee_dict(ra.attendee) for ra in sorted(room.room_assignments, key=lambda ra: ra.attendee.full_name)]
     }, **{
         night: getattr(room, night) for night in c.NIGHT_NAMES
     })
 
 
-def _get_declined(session, department):
+def _get_declined(session):
     return [_attendee_dict(a) for a in session.query(Attendee)
                                               .order_by(Attendee.full_name)
                                               .join(Attendee.hotel_requests)
-                                              .filter(Attendee.hotel_requests != None,
-                                                      HotelRequests.nights == '',
-                                                      Attendee.assigned_depts.contains(str(department))).all()]
+                                              .filter(Attendee.hotel_requests != None, HotelRequests.nights == '').all()]
 
 
-def _get_unconfirmed(session, department, assigned_ids):
+def _get_unconfirmed(session, assigned_ids):
     return [_attendee_dict(a) for a in session.query(Attendee)
                                               .order_by(Attendee.full_name)
                                               .filter(Attendee.badge_type == c.STAFF_BADGE,
-                                                      Attendee.hotel_requests == None,
-                                                      Attendee.assigned_depts.contains(str(department))).all()
+                                                      Attendee.hotel_requests == None).all()
                               if a not in assigned_ids]
 
 
-def _get_unassigned(session, department, assigned_ids):
-    has_override_access = c.STAFF_ROOMS in AdminAccount.access_set()
-    assigned_to_dept = [] if has_override_access else [Attendee.assigned_depts.like('%{}%'.format(department))]
+def _get_unassigned(session, assigned_ids):
     return [_attendee_dict(a) for a in session.query(Attendee)
                                               .order_by(Attendee.full_name)
                                               .join(Attendee.hotel_requests)
                                               .filter(Attendee.hotel_requests != None,
-                                                      HotelRequests.nights != '',
-                                                      *assigned_to_dept).all()
+                                                      HotelRequests.nights != '').all()
                               if a.id not in assigned_ids]
 
 
-def _get_assigned_elsewhere(session, department):
-    return [_attendee_dict(ra.attendee)
-            for ra in session.query(RoomAssignment)
-                             .options(joinedload(RoomAssignment.attendee), joinedload(RoomAssignment.room))
-                             .join(RoomAssignment.room, RoomAssignment.attendee)
-                             .filter(Room.department != department,
-                                     Attendee.assigned_depts.like('%{}%'.format(department))).all()]
-
-
-def _hotel_dump(session, department):
-    room_filter = {'department': department} if cannot_modify_rooms() else {}
-    rooms = [_room_dict(session, room) for room in session.query(Room).filter_by(**room_filter).order_by(Room.created).all()]
+def _hotel_dump(session):
+    rooms = [_room_dict(session, room) for room in session.query(Room).order_by(Room.created).all()]
     assigned = sum([r['attendees'] for r in rooms], [])
-    assigned_elsewhere = _get_assigned_elsewhere(session, department)
-    assigned_ids = [a['id'] for a in assigned + assigned_elsewhere]
+    assigned_ids = [a['id'] for a in assigned]
     return {
         'rooms': rooms,
         'assigned': assigned,
-        'assigned_elsewhere': assigned_elsewhere,
-        'declined': _get_declined(session, department),
-        'unconfirmed': _get_unconfirmed(session, department, assigned_ids),
-        'unassigned': _get_unassigned(session, department, assigned_ids)
+        'declined': _get_declined(session),
+        'unconfirmed': _get_unconfirmed(session, assigned_ids),
+        'unassigned': _get_unassigned(session, assigned_ids)
     }
