@@ -37,6 +37,10 @@ class Attendee:
     hotel_eligible = Column(Boolean, default=False, admin_only=True)
     hotel_requests = relationship('HotelRequests', backref=backref('attendee', load_on_pending=True), uselist=False)
 
+    @property
+    def shift_prereqs_complete(self):
+        return not self.placeholder and self.food_restrictions and self.shirt_size_marked and self.hotel_requests
+
     @presave_adjustment
     def staffer_hotel_eligibility(self):
         if self.badge_type == c.STAFF_BADGE:
