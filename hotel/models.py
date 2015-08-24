@@ -21,9 +21,13 @@ def _night(name):
 
 class NightsMixin(object):
     @property
-    def nights_display(self):
+    def nights_labels(self):
         ordered = sorted(self.nights_ints, key=c.NIGHT_DISPLAY_ORDER.index)
-        return ' / '.join(dict(c.NIGHT_OPTS)[val] for val in ordered)
+        return [c.NIGHTS[val] for val in ordered]
+
+    @property
+    def nights_display(self):
+        return ' / '.join(self.nights_labels)
 
     @property
     def setup_teardown(self):
@@ -105,10 +109,26 @@ class HotelRequests(MagModel, NightsMixin):
 
 class Room(MagModel, NightsMixin):
     notes      = Column(UnicodeText)
-    locked_in  = Column(Boolean, default=True)
+    locked_in  = Column(Boolean, default=False)
     nights     = Column(MultiChoice(c.NIGHT_OPTS))
     created    = Column(UTCDateTime, server_default=utcnow())
-    room_assignments = relationship('RoomAssignment', backref='room')
+    assignments = relationship('RoomAssignment', backref='room')
+
+    @property
+    def email(self):
+        return [ra.attendee.email for ra in self.assignments]
+
+    @property
+    def first_names(self):
+        return [ra.attendee.first_name for ra in self.assignments]
+
+    @property
+    def check_in_date(self):
+        return c.NIGHT_DATES[self.nights_labels[0]]
+
+    @property
+    def check_out_date(self):
+        return c.NIGHT_DATES[self.nights_labels[-1]] + timedelta(days=1)
 
 
 class RoomAssignment(MagModel):

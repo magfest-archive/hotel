@@ -1,7 +1,7 @@
 from hotel import *
 
-# MAGFest provides staff rooms for returning volunteers.  Add a "room_deadline" setting to the [dates]
-# section of the main repo's config when including this plugin.
+AutomatedEmail.extra_models[Room] = lambda session: session.query(Room).all()
+
 
 StopsEmail('Want volunteer hotel room space at {EVENT_NAME}?', 'hotel_rooms.txt',
            lambda a: days_before(45, c.ROOM_DEADLINE, 14) and c.AFTER_SHIFTS_CREATED and a.hotel_eligible)
@@ -17,3 +17,6 @@ StopsEmail('Reminder to meet your {EVENT_NAME} hotel room requirements', 'hotel_
 
 StopsEmail('Final reminder to meet your {EVENT_NAME} hotel room requirements', 'hotel_hours.txt',
            lambda a: days_before(7, c.UBER_TAKEDOWN) and a.hotel_shifts_required and a.weighted_hours < 30)
+
+
+AutomatedEmail(Room, '{EVENT_NAME} Hotel Room Assignment', 'room_assignment.txt', lambda r: r.locked_in)
