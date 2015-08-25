@@ -1,9 +1,10 @@
 from hotel import *
 
 hotel_config = parse_config(__file__)
+c.include_plugin_config(hotel_config)
 
 c.NIGHT_NAMES = [name.lower() for name in c.NIGHT_VARS]
-c.NIGHT_DISPLAY_ORDER = [getattr(c, night.upper()) for night in hotel_config['night_display_order']]
+c.NIGHT_DISPLAY_ORDER = [getattr(c, night.upper()) for night in c.NIGHT_DISPLAY_ORDER]
 
 c.NIGHT_DATES = {c.ESCHATON.strftime('%A'): c.ESCHATON.date()}
 
@@ -23,9 +24,6 @@ c.TEARDOWN_NIGHTS = c.NIGHT_DISPLAY_ORDER[1 + c.NIGHT_DISPLAY_ORDER.index(c.CORE
 
 for _attr in ['CORE_NIGHT', 'SETUP_NIGHT', 'TEARDOWN_NIGHT']:
     setattr(c, _attr + '_NAMES', [c.NIGHTS[night] for night in getattr(c, _attr + 'S')])
-
-c.CHECK_IN_TIME = hotel_config['check_in_time']
-c.CHECK_OUT_TIME = hotel_config['check_out_time']
 
 
 @Config.mixin
