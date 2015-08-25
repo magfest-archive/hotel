@@ -40,6 +40,7 @@ class NightsMixin(object):
 class Attendee:
     hotel_eligible = Column(Boolean, default=False, admin_only=True)
     hotel_requests = relationship('HotelRequests', backref=backref('attendee', load_on_pending=True), uselist=False)
+    room_assignments  = relationship('RoomAssignment', backref=backref('attendee', load_on_pending=True), uselist=False)
 
     @presave_adjustment
     def staffer_hotel_eligibility(self):
