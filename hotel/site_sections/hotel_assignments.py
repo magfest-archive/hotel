@@ -61,6 +61,13 @@ class Root:
         return _hotel_dump(session)
 
     @ajax
+    def lock_in_room(self, session, id):
+        room = session.room(id)
+        room.locked_in = True
+        session.commit()
+        return _hotel_dump(session)
+
+    @ajax
     def assign_to_room(self, session, attendee_id, room_id):
         room = session.room(room_id)
         for other_room in session.query(RoomAssignment).filter_by(attendee_id=attendee_id).all():
@@ -104,6 +111,7 @@ def _room_dict(session, room):
     return dict({
         'id': room.id,
         'notes': room.notes,
+        'locked_in': room.locked_in,
         'nights': room.nights_display,
         'attendees': [_attendee_dict(ra.attendee) for ra in sorted(room.assignments, key=lambda ra: ra.attendee.full_name)]
     }, **{

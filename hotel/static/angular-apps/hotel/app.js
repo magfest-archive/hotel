@@ -59,10 +59,17 @@ angular.module('hotel', ['ngRoute', 'magfest'])
                 params: {attendee_id: attendee_id}
             }).success(Hotel.set).error(errorHandler);
         };
-        $scope.deleteRoom = function(room_id) {
+        $scope.deleteRoom = function (room_id) {
             $http({
                 method: 'post',
                 url: 'delete_room',
+                params: {id: room_id}
+            }).success(Hotel.set).error(errorHandler);
+        };
+        $scope.lockInRoom = function (room_id) {
+            $http({
+                method: 'post',
+                url: 'lock_in_room',
                 params: {id: room_id}
             }).success(Hotel.set).error(errorHandler);
         };
