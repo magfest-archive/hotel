@@ -19,4 +19,5 @@ StopsEmail('Final reminder to meet your {EVENT_NAME} hotel room requirements', '
            lambda a: days_before(7, c.UBER_TAKEDOWN) and a.hotel_shifts_required and a.weighted_hours < 30)
 
 
-AutomatedEmail(Room, '{EVENT_NAME} Hotel Room Assignment', 'room_assignment.txt', lambda r: r.locked_in)
+AutomatedEmail(Room, '{EVENT_NAME} Hotel Room Assignment', 'room_assignment.txt', lambda r: r.locked_in,
+               sender=c.ROOM_EMAIL_SENDER)
