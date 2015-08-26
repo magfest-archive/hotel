@@ -92,6 +92,51 @@ class Root:
         session.commit()
         return _hotel_dump(session)
 
+    @csv_file
+    def ordered(self, out, session):
+        reqs = [hr for hr in session.query(HotelRequests).options(joinedload(HotelRequests.attendee)).all() if hr.nights]
+        assigned = {ra.attendee for ra in session.query(RoomAssignment).options(joinedload(RoomAssignment.attendee), joinedload(RoomAssignment.room)).all()}
+        unassigned = {hr.attendee for hr in reqs if hr.attendee not in assigned}
+
+        names = {}
+        for attendee in unassigned:
+            names.setdefault(attendee.last_name.lower(), set()).add(attendee)
+
+        lookup = defaultdict(set)
+        for xs in names.values():
+            for attendee in xs:
+                lookup[attendee] = xs
+
+        for req in reqs:
+            if req.attendee in unassigned:
+                for word in req.wanted_roommates.lower().replace(',', '').split():
+                    try:
+                        combined = lookup[list(names[word])[0]] | lookup[req.attendee]
+                        for attendee in combined:
+                            lookup[attendee] = combined
+                    except:
+                        pass
+
+        writerow = lambda a, hr: out.writerow([
+            a.full_name, a.email, a.cellphone,
+            a.hotel_requests.nights_display, ' / '.join(a.assigned_depts_labels),
+            hr.wanted_roommates, hr.unwanted_roommates, hr.special_needs
+        ])
+        grouped = {frozenset(group) for group in lookup.values()}
+        out.writerow(['Name', 'Email', 'Phone', 'Nights', 'Departments', 'Roomate Requests', 'Roomate Anti-Requests', 'Special Needs'])
+        # TODO: for better efficiency, a multi-level joinedload would be preferable here
+        for room in session.query(Room).options(joinedload(Room.assignments)).all():
+            for i in range(3):
+                out.writerow([])
+            out.writerow([('Locked-in ' if room.locked_in else '') + 'room created by STOPS for ' + room.nights_display + (' ({})'.format(room.notes) if room.notes else '')])
+            for ra in room.assignments:
+                writerow(ra.attendee, ra.attendee.hotel_requests)
+        for group in sorted(grouped, key=len, reverse=True):
+            for i in range(3):
+                out.writerow([])
+            for a in group:
+                writerow(a, a.hotel_requests)
+
 
 def _attendee_dict(attendee):
     return {
