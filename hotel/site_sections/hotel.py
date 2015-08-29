@@ -34,7 +34,7 @@ class Root:
 
     def hours(self, session):
         staffers = session.query(Attendee).filter_by(badge_type=c.STAFF_BADGE).order_by(Attendee.full_name).all()
-        staffers = [s for s in staffers if s.hotel_shifts_required and s.weighted_hours < 30]
+        staffers = [s for s in staffers if s.hotel_shifts_required and s.weighted_hours < c.HOTEL_REQ_HOURS]
         return {'staffers': staffers}
 
     def no_shows(self, session):
