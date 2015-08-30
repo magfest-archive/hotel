@@ -6,7 +6,7 @@ Our records indicate that you've already filled out the hotel room form, so than
 {% else %}
 If you want hotel room space, you must sign up by {{ c.ROOM_DEADLINE|datetime }}.
 {% endif %}
-All volunteers who receive hotel room space must sign up for at least 30 weighted hours worth of shifts, but you won't be charged any money.  Volunteers who help with setup or teardown before or after {{ c.EVENT_NAME }} do not need to sign up for 30 weighted hours in advance, because so much of their work consists of be non-shift hours.
+All volunteers who receive hotel room space must sign up for at least {{ c.HOTEL_REQ_HOURS }} weighted hours worth of shifts, but you won't be charged any money.  Volunteers who help with setup or teardown before or after {{ c.EVENT_NAME }} do not need to sign up for {{ c.HOTEL_REQ_HOURS }} weighted hours in advance, because so much of their work consists of be non-shift hours.
 
 Please let us know if you have any questions.
 

@@ -13,10 +13,10 @@ StopsEmail('Last chance to sign up for {EVENT_NAME} hotel room space', 'hotel_re
            lambda a: days_before(2, c.ROOM_DEADLINE) and a.hotel_eligible and not a.hotel_requests)
 
 StopsEmail('Reminder to meet your {EVENT_NAME} hotel room requirements', 'hotel_hours.txt',
-           lambda a: days_before(14, c.UBER_TAKEDOWN, 7) and a.hotel_shifts_required and a.weighted_hours < 30)
+           lambda a: days_before(14, c.UBER_TAKEDOWN, 7) and a.hotel_shifts_required and a.weighted_hours < c.HOTEL_REQ_HOURS)
 
 StopsEmail('Final reminder to meet your {EVENT_NAME} hotel room requirements', 'hotel_hours.txt',
-           lambda a: days_before(7, c.UBER_TAKEDOWN) and a.hotel_shifts_required and a.weighted_hours < 30)
+           lambda a: days_before(7, c.UBER_TAKEDOWN) and a.hotel_shifts_required and a.weighted_hours < c.HOTEL_REQ_HOURS)
 
 
 AutomatedEmail(Room, '{EVENT_NAME} Hotel Room Assignment', 'room_assignment.txt', lambda r: r.locked_in,
