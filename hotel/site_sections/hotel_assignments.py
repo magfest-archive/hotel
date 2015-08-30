@@ -69,10 +69,11 @@ class Root:
 
     @ajax
     def assign_to_room(self, session, attendee_id, room_id):
+        message = ''
         room = session.room(room_id)
-        for other_room in session.query(RoomAssignment).filter_by(attendee_id=attendee_id).all():
-            if set(other_room.nights_ints).intersection(room.nights_ints):
-                break  # don't assign someone to a room which overlaps with an existing room assignment
+        for other in session.query(RoomAssignment).filter_by(attendee_id=attendee_id).all():
+            if set(other.room.nights_ints).intersection(room.nights_ints):
+                message = "Warning: this attendee already has a room which overlaps with this room's nights"
         else:
             attendee = session.attendee(attendee_id)
             ra = RoomAssignment(attendee=attendee, room=room)
@@ -83,11 +84,11 @@ class Root:
             elif not hr.approved:
                 hr.decline()
             session.commit()
-        return _hotel_dump(session)
+        return dict(_hotel_dump(session), message=message)
 
     @ajax
-    def unassign_from_room(self, session, attendee_id):
-        for ra in session.query(RoomAssignment).filter_by(attendee_id=attendee_id).all():
+    def unassign_from_room(self, session, attendee_id, room_id):
+        for ra in session.query(RoomAssignment).filter_by(attendee_id=attendee_id, room_id=room_id).all():
             session.delete(ra)
         session.commit()
         return _hotel_dump(session)
@@ -149,10 +150,11 @@ def _attendee_dict(attendee):
         'approved': int(getattr(attendee.hotel_requests, 'approved', False)),
         'departments': ' / '.join(attendee.assigned_depts_labels),
         'nights_lookup': {night: getattr(attendee.hotel_requests, night, False) for night in c.NIGHT_NAMES},
+        'multiply_assigned': len(attendee.room_assignments) > 1
     }
 
 
-def _room_dict(session, room):
+def _room_dict(room):
     return dict({
         'id': room.id,
         'notes': room.notes,
@@ -189,13 +191,15 @@ def _get_unassigned(session, assigned_ids):
 
 
 def _hotel_dump(session):
-    rooms = [_room_dict(session, room) for room in session.query(Room).order_by(Room.created).all()]
+    rooms = [_room_dict(room) for room in session.query(Room).order_by(Room.created).all()]
     assigned = sum([r['attendees'] for r in rooms], [])
     assigned_ids = [a['id'] for a in assigned]
+    unassigned = _get_unassigned(session, assigned_ids)
     return {
         'rooms': rooms,
         'assigned': assigned,
+        'unassigned': unassigned,
         'declined': _get_declined(session),
         'unconfirmed': _get_unconfirmed(session, assigned_ids),
-        'unassigned': _get_unassigned(session, assigned_ids)
+        'eligible': sorted(assigned + unassigned, key=lambda a: a['name'])
     }

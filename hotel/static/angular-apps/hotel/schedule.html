@@ -17,16 +17,19 @@
     <div style="margin-top:5px">
         <table>
             <tr ng-repeat="attendee in room.attendees">
-                <td> <a href="#/attendee/{{ attendee.id }}">{{ attendee.name }}</a> </td>
-                <td> &nbsp; {{ attendee.nights }} </td>
-                <td> &nbsp; <button ng-click="remove(attendee.id)">Remove</button> </td>
-                <td> &nbsp; <span ng-if="wrongNights(room, attendee)" style="color:red">Room nights don't match attendee's requested nights</span> </td>
+                <td valign="center"> <a href="#/attendee/{{ attendee.id }}">{{ attendee.name }}</a> </td>
+                <td valid="center"> &nbsp; {{ attendee.nights }} </td>
+                <td valign="center"> &nbsp; <button ng-click="remove(attendee.id, room.id)">Remove</button> </td>
+                <td>
+                    <div ng-if="wrongNights(room, attendee)" style="color:red">Room nights don't match attendee's requested nights.</div>
+                    <div ng-if="attendee.multiply_assigned" style="color:green">This attendee is assigned to multiple rooms.</div>
+                </td>
             </tr>
         </table>
         <div ng-controller="AddController">
-            <div ng-if="lists.unassigned.length">
+            <div ng-if="lists.eligible.length">
                 Add an attendee:
-                <select ng-model="assignment.attendee_id" ng-options="attendee.id as attendee.name + ' (' + attendee.nights + ')' for attendee in lists.unassigned"></select>
+                <select ng-model="assignment.attendee_id" ng-options="attendee.id as attendee.name + ' (' + attendee.nights + ')' for attendee in lists.eligible"></select>
                 <button ng-click="add()">Add to Room</button>
             </div>
         </div>

@@ -8,16 +8,17 @@ angular.module('hotel', ['ngRoute', 'magfest'])
         var self = {
             lists: {
                 rooms: [],
+                eligible: [],
                 assigned: [],
+                declined: [],
                 unassigned: [],
                 unconfirmed: [],
-                declined: [],
                 all_attendees: []
             },
-            _set: function(dst, src) {
+            _set: function (dst, src) {
                 dst.splice.apply(dst, [0, dst.length].concat(src));
             },
-            set: function(data) {
+            set: function (data) {
                 angular.forEach(self.lists, function(xs, name) {
                     self._set(xs, data[name] || []);
                 });
@@ -26,6 +27,9 @@ angular.module('hotel', ['ngRoute', 'magfest'])
                         self.lists.all_attendees.push.apply(self.lists.all_attendees, xs);
                     }
                 });
+                if (data.message) {
+                    alert(data.message);  // TODO: use something other than alert() for better testability
+                }
             },
             get: function (name, id) {
                 for (var i=0, x; x=self.lists[name][i]; i++) {
@@ -52,11 +56,14 @@ angular.module('hotel', ['ngRoute', 'magfest'])
         $scope.wrongNights = function (room, attendee) {
             return room.nights != attendee.nights;
         };
-        $scope.remove = function (attendee_id) {
+        $scope.remove = function (attendee_id, room_id) {
             $http({
                 method: 'post',
                 url: 'unassign_from_room',
-                params: {attendee_id: attendee_id}
+                params: {
+                    room_id: room_id,
+                    attendee_id: attendee_id
+                }
             }).success(Hotel.set).error(errorHandler);
         };
         $scope.deleteRoom = function (room_id) {
@@ -120,7 +127,7 @@ angular.module('hotel', ['ngRoute', 'magfest'])
     .controller('AddController', function($scope, $http, Hotel, errorHandler) {
         $scope.assignment = {
             room_id: $scope.room.id,
-            attendee_id: $scope.lists.unassigned[0] && $scope.lists.unassigned[0].id
+            attendee_id: $scope.lists.eligible[0] && $scope.lists.eligible[0].id
         };
         $scope.isSetupOrTeardown = function (modelWithNights) {    // TODO: this would be a one-liner in lodash
             var nonCore = false;
@@ -131,7 +138,7 @@ angular.module('hotel', ['ngRoute', 'magfest'])
         };
         $scope.add = function() {
             var room = Hotel.get('rooms', $scope.assignment.room_id);
-            var attendee = Hotel.get('unassigned', $scope.assignment.attendee_id);
+            var attendee = Hotel.get('eligible', $scope.assignment.attendee_id);
             var autoDecline = !attendee.approved && $scope.isSetupOrTeardown(attendee.nights_lookup) && !$scope.isSetupOrTeardown(room);
             // TODO: replace confirm with an async Angular-driven UI component (for better testability)
             if (!autoDecline || confirm('This attendee has requested setup/teardown and you are assigning them to a regular room, which will automatically decline their request to help with setup/teardown.')) {
