@@ -30,5 +30,5 @@ for _attr in ['CORE_NIGHT', 'SETUP_NIGHT', 'TEARDOWN_NIGHT']:
 class ExtraConfig:
     @property
     def ONE_WEEK_OR_TAKEDOWN(self):
-        week_from_now = datetime.combine(date.today() + timedelta(days=7), time(23, 59)).replace(tzinfo=c.EVENT_TIMEZONE)
+        week_from_now = c.EVENT_TIMEZONE.localize(datetime.combine(date.today() + timedelta(days=7), time(23, 59)))
         return min(week_from_now, c.UBER_TAKEDOWN)

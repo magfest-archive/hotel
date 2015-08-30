@@ -40,7 +40,7 @@ class NightsMixin(object):
 class Attendee:
     hotel_eligible = Column(Boolean, default=False, admin_only=True)
     hotel_requests = relationship('HotelRequests', backref=backref('attendee', load_on_pending=True), uselist=False)
-    room_assignments  = relationship('RoomAssignment', backref=backref('attendee', load_on_pending=True), uselist=False)
+    room_assignments  = relationship('RoomAssignment', backref=backref('attendee', load_on_pending=True))
 
     @presave_adjustment
     def staffer_hotel_eligibility(self):
@@ -134,4 +134,4 @@ class Room(MagModel, NightsMixin):
 
 class RoomAssignment(MagModel):
     room_id     = Column(UUID, ForeignKey('room.id'))
-    attendee_id = Column(UUID, ForeignKey('attendee.id'), unique=True)
+    attendee_id = Column(UUID, ForeignKey('attendee.id'))
