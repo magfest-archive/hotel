@@ -176,7 +176,7 @@ def _get_declined(session):
 def _get_unconfirmed(session, assigned_ids):
     return [_attendee_dict(a) for a in session.query(Attendee)
                                               .order_by(Attendee.full_name)
-                                              .filter(Attendee.badge_type == c.STAFF_BADGE,
+                                              .filter(Attendee.hotel_eligible == True,
                                                       Attendee.hotel_requests == None).all()
                               if a not in assigned_ids]
 
