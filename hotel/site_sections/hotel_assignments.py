@@ -138,6 +138,23 @@ class Root:
             for a in group:
                 writerow(a, a.hotel_requests)
 
+    @csv_file
+    def hilton_mark_center(self, out, session):
+        """spreadsheet in the format requested by the Hilton Mark Center"""
+        out.writerow(['Last Name', 'First Name', 'Arrival', 'Departure', 'Room Type', 'Number of Adults', 'Credit Card Name', 'Credit Card Number', 'Credit Card Expiration', 'Last Name 2', 'First Name 2', 'Last Name 3', 'First Name 3', 'Last Name 4', 'First Name 4', 'comments'])
+        for room in session.query(Room).order_by(Room.created).all():
+            if room.assignments:
+                assignments = [ra.attendee for ra in room.assignments[:4]]
+                roommates = [[a.last_name, a.first_name] for a in assignments[1:]] + [['', '']] * (4 - len(assignments))
+                out.writerow([
+                    assignments[0].last_name,
+                    assignments[0].first_name,
+                    room.check_in_date.strftime('%Y-%m-%d'),
+                    room.check_out_date.strftime('%Y-%m-%d'),
+                    'Q2',  # code for two beds, 'K1' would indicate a single king-sized bed
+                    len(assignments),
+                    '', '', ''  # no credit card info in this spreadsheet
+                ] + sum(roommates, []) + [room.notes])
 
 def _attendee_dict(attendee):
     return {
