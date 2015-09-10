@@ -3,7 +3,7 @@ from hotel import *
 
 @all_renderable(c.PEOPLE)
 class Root:
-    def setup_teardown(self):
+    def setup_teardown(self, session):
         attendees = []
         for hr in session.query(HotelRequests).filter_by(approved=True).options(joinedload(HotelRequests.attendee)).all():
             if hr.setup_teardown and hr.attendee.takes_shifts:
