@@ -38,9 +38,8 @@ class Root:
         return {'staffers': staffers}
 
     def no_shows(self, session):
-        staffers = session.query(Attendee).filter_by(badge_type=c.STAFF_BADGE).order_by(Attendee.full_name).all()
-        staffers = [s for s in staffers if s.hotel_nights and not s.checked_in]
-        return {'staffers': staffers}
+        staffers = [ra.attendee for ra in session.query(RoomAssignment).all() if not ra.attendee.checked_in]
+        return {'staffers': sorted(staffers, key=lambda a: a.full_name)}
 
     @ajax
     def approve(self, session, id, approved):

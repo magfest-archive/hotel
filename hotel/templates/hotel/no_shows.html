@@ -4,19 +4,36 @@
 
 <h2> {{ staffers|length }} Staffers With Hotel Space Who Have Not Checked In </h2>
 
-<table class="list">
-<tr class="header">
-    <td> Staffer Name </td>
-    <td> Departments </td>
-    <td> Room Nights </td>
-</tr>
+Note that occasionally someone will mistakenly get a badge and not be marked as checked in.  For this reason, this report
+also shows their worked hours.
+
+<br/> <br/>
+
+<table style="width:100%">
+<thead style="font-weight:bold">
+    <tr>
+        <td> Staffer Name </td>
+        <td> Departments </td>
+        <td> Worked Hours </td>
+        <td> Requested Nights </td>
+        <td> Assigned Room Nights </td>
+    </tr>
+</thead>
+<tbody>
 {% for attendee in staffers %}
     <tr>
         <td> {{ attendee|form_link }} </td>
         <td> {{ attendee.assigned_depts_labels|join:" / " }} </td>
+        <td> {{ attendee.worked_hours }} ({{ attendee.nonshift_hours }} nonshift) </td>
         <td> {{ attendee.hotel_requests.nights_display }} </td>
+        <td>
+            {% for ra in attendee.room_assignments %}
+                <div>{{ ra.room.nights_display }}</div>
+            {% endfor %}
+        </td>
     </tr>
 {% endfor %}
+</tbody>
 </table>
 
 {% endblock %}
