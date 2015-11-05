@@ -156,6 +156,7 @@ class Root:
                     '', '', ''  # no credit card info in this spreadsheet
                 ] + sum(roommates, []) + [room.notes])
 
+
 def _attendee_dict(attendee):
     return {
         'id': attendee.id,
