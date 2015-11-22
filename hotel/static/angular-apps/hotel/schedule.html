@@ -4,8 +4,6 @@
 
 <h3> Rooms </h3>
 
-<a href="#/create-room">Add a room</a>
-
 <table style="width:auto">
 <tr ng-repeat="room in lists.rooms"><td style="border:1px solid black" ng-class="{'locked-in': room.locked_in}">
     <b>{{ room.nights }}</b> &nbsp;
@@ -36,6 +34,8 @@
     </div>
 </td></tr>
 </table>
+
+<a href="#/create-room">Add a room</a>
 
 <table style="text-align:center">
 <tr>
