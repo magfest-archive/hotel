@@ -6,6 +6,8 @@ If you don't sign up by {{ c.ROOM_DEADLINE|datetime }} then you will not receive
 
 All volunteers who receive hotel room space must sign up for at least {{ c.HOTEL_REQ_HOURS }} weighted hours worth of shifts, but you won't be charged any money.  Volunteers who help with setup or teardown before or after {{ c.EVENT_NAME }} do not need to sign up for {{ c.HOTEL_REQ_HOURS }} weighted hours in advance, because so much of their work consists of be non-shift hours.
 
+If you have trouble with the login information, please go to: {{ c.URL_BASE }}/preregistration/confirm?id={{ attendee.id }} and verify your registration information.
+
 Please let us know if you have any questions.
 
 {{ c.STOPS_EMAIL_SIGNATURE }}
