@@ -23,3 +23,23 @@ def test_hotel_shifts_required_preshifts(monkeypatch):
     monkeypatch.setattr(Attendee, 'takes_shifts', True)
     monkeypatch.setattr(Attendee, 'hotel_nights', [c.THURSDAY, c.FRIDAY])
     assert not Attendee().hotel_shifts_required
+
+
+def test_hotel_request_allows_setup_and_teardown(monkeypatch):
+    with Session() as session:
+        attendee = Attendee()
+        session.add(attendee)
+        session.commit()
+        assert not attendee.can_work_setup
+        assert not attendee.can_work_teardown
+
+        hr = HotelRequests()
+        hr.attendee = attendee
+        session.add(hr)
+        hr.nights = ','.join(map(str, [c.WEDNESDAY, c.THURSDAY, c.MONDAY]))
+
+        attendee.hotel_requests.approve()
+        session.commit()
+
+        assert attendee.can_work_setup
+        assert attendee.can_work_teardown

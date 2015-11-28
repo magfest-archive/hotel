@@ -101,8 +101,16 @@ class HotelRequests(MagModel, NightsMixin):
     special_needs      = Column(UnicodeText)
     approved           = Column(Boolean, default=False, admin_only=True)
 
+    def approve(self):
+        self.approved = True
+
     def decline(self):
         self.nights = ','.join(night for night in self.nights.split(',') if int(night) in c.CORE_NIGHTS)
+
+    # TODO: DOES NOT CURRENTLY GET CALLED, BROKEN, NEED TO FIX
+    @presave_adjustment
+    def cascading_save(self):
+        self.attendee.presave_adjustments()
 
     def __repr__(self):
         return '<{self.attendee.full_name} Hotel Requests>'.format(self=self)
