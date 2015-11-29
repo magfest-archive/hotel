@@ -103,7 +103,6 @@ class HotelRequests(MagModel, NightsMixin):
 
     def decline(self):
         self.nights = ','.join(night for night in self.nights.split(',') if int(night) in c.CORE_NIGHTS)
-        # self.approved = False
 
     @presave_adjustment
     def cascading_save(self):
