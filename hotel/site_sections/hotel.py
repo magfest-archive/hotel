@@ -45,7 +45,7 @@ class Root:
     def approve(self, session, id, approved):
         hr = session.hotel_requests(id)
         if approved == 'approved':
-            hr.approve()
+            hr.approved = True
         else:
             hr.decline()
         session.commit()

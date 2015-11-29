@@ -101,11 +101,9 @@ class HotelRequests(MagModel, NightsMixin):
     special_needs      = Column(UnicodeText)
     approved           = Column(Boolean, default=False, admin_only=True)
 
-    def approve(self):
-        self.approved = True
-
     def decline(self):
         self.nights = ','.join(night for night in self.nights.split(',') if int(night) in c.CORE_NIGHTS)
+        # self.approved = False
 
     @presave_adjustment
     def cascading_save(self):
