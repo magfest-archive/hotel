@@ -25,21 +25,25 @@ def test_hotel_shifts_required_preshifts(monkeypatch):
     assert not Attendee().hotel_shifts_required
 
 
-def test_hotel_request_allows_setup_and_teardown(monkeypatch):
+def test_by_default_no_setup_and_teardown(monkeypatch):
     with Session() as session:
         attendee = Attendee()
-        session.add(attendee)
-        session.commit()
+        attendee.presave_adjustments()
         assert not attendee.can_work_setup
         assert not attendee.can_work_teardown
 
+
+def test_hotel_approved_and_can_work_setup_and_teardown(monkeypatch):
+    with Session() as session:
         hr = HotelRequests()
+        attendee = Attendee()
+
+        # attendee requests shoulder nights, and we approve it
         hr.attendee = attendee
-        session.add(hr)
         hr.nights = ','.join(map(str, [c.WEDNESDAY, c.THURSDAY, c.MONDAY]))
+        hr.approve()
 
-        attendee.hotel_requests.approve()
-        session.commit()
-
+        # on the next save, the attendee should be able to work setup and teardown
+        hr.presave_adjustments()
         assert attendee.can_work_setup
         assert attendee.can_work_teardown
