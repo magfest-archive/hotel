@@ -104,6 +104,10 @@ class HotelRequests(MagModel, NightsMixin):
     def decline(self):
         self.nights = ','.join(night for night in self.nights.split(',') if int(night) in c.CORE_NIGHTS)
 
+    @presave_adjustment
+    def cascading_save(self):
+        self.attendee.presave_adjustments()
+
     def __repr__(self):
         return '<{self.attendee.full_name} Hotel Requests>'.format(self=self)
 
