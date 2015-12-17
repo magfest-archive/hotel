@@ -31,9 +31,12 @@ class Root:
                 requests.nights = ','.join(map(str, c.CORE_NIGHTS))
 
         nights = []
+        two_day_before = (c.EPOCH - timedelta(days=2)).strftime('%A')
         day_before = (c.EPOCH - timedelta(days=1)).strftime('%A')
         last_day = c.ESCHATON.strftime('%A').upper()
         day_after = (c.ESCHATON + timedelta(days=1)).strftime('%A')
+        nights.append([getattr(c, two_day_before.upper()), getattr(requests, two_day_before.upper()),
+                       "I'd like to help set up on " + two_day_before])
         nights.append([getattr(c, day_before.upper()), getattr(requests, day_before.upper()),
                        "I'd like to help set up on " + day_before])
         for night in c.CORE_NIGHTS:
