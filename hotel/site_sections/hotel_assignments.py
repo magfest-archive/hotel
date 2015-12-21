@@ -139,7 +139,7 @@ class Root:
                 writerow(a, a.hotel_requests)
 
     @csv_file
-    def hilton_mark_center(self, out, session):
+    def passkey(self, out, session):
         """spreadsheet in the format requested by the Hilton Mark Center"""
         out.writerow(['Last Name', 'First Name', 'Arrival', 'Departure', 'Room Type', 'Number of Adults', 'Credit Card Name', 'Credit Card Number', 'Credit Card Expiration', 'Last Name 2', 'First Name 2', 'Last Name 3', 'First Name 3', 'Last Name 4', 'First Name 4', 'comments'])
         for room in session.query(Room).order_by(Room.created).all():
@@ -176,6 +176,7 @@ def _room_dict(room):
     return dict({
         'id': room.id,
         'notes': room.notes,
+        'message': room.message,
         'locked_in': room.locked_in,
         'nights': room.nights_display,
         'attendees': [_attendee_dict(ra.attendee) for ra in sorted(room.assignments, key=lambda ra: ra.attendee.full_name)]

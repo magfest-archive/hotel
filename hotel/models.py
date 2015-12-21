@@ -114,6 +114,7 @@ class HotelRequests(MagModel, NightsMixin):
 
 class Room(MagModel, NightsMixin):
     notes      = Column(UnicodeText)
+    message    = Column(UnicodeText)
     locked_in  = Column(Boolean, default=False)
     nights     = Column(MultiChoice(c.NIGHT_OPTS))
     created    = Column(UTCDateTime, server_default=utcnow())
