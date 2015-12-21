@@ -15,6 +15,8 @@ If you are assigned to receive a room on a night before {{ c.CORE_NIGHT_NAMES|fi
 
 We make every attempt to room staffers with those people that they requested.  We do our best to assign everyone to a room with at least one requested person, but this may not possible for everyone, and we may add staff to rooms that had an open slot.
 
-If there are any issues with your room at event, please come to Fest Ops and let someone in Staffing Ops know.  They will relay the information to the hotel liaison team as soon as possible.  We appreciate your hard work and we hope that you enjoy {{ c.EVENT_NAME }}.
+{% if room.message %}{{ room.message }}
+
+{% endif %}If there are any issues with your room at event, please come to Fest Ops and let someone in Staffing Ops know.  They will relay the information to the hotel liaison team as soon as possible.  We appreciate your hard work and we hope that you enjoy {{ c.EVENT_NAME }}.
 
 {{ c.STOPS_EMAIL_SIGNATURE }}
