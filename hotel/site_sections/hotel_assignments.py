@@ -95,7 +95,7 @@ class Root:
 
     @csv_file
     def ordered(self, out, session):
-        reqs = [hr for hr in session.query(HotelRequests).options(joinedload(HotelRequests.attendee)).all() if hr.nights]
+        reqs = [hr for hr in session.query(HotelRequests).options(joinedload(HotelRequests.attendee)).all() if hr.nights and hr.attendee.badge_status in (c.NEW_STATUS, c.COMPLETED_STATUS)]
         assigned = {ra.attendee for ra in session.query(RoomAssignment).options(joinedload(RoomAssignment.attendee), joinedload(RoomAssignment.room)).all()}
         unassigned = {hr.attendee for hr in reqs if hr.attendee not in assigned}
 
@@ -189,14 +189,17 @@ def _get_declined(session):
     return [_attendee_dict(a) for a in session.query(Attendee)
                                               .order_by(Attendee.full_name)
                                               .join(Attendee.hotel_requests)
-                                              .filter(Attendee.hotel_requests != None, HotelRequests.nights == '').all()]
+                                              .filter(Attendee.hotel_requests != None,
+                                                      HotelRequests.nights == '',
+                                                      Attendee.badge_status.in_([c.NEW_STATUS, c.COMPLETED_STATUS])).all()]
 
 
 def _get_unconfirmed(session, assigned_ids):
     return [_attendee_dict(a) for a in session.query(Attendee)
                                               .order_by(Attendee.full_name)
                                               .filter(Attendee.hotel_eligible == True,
-                                                      Attendee.hotel_requests == None).all()
+                                                      Attendee.hotel_requests == None,
+                                                      Attendee.badge_status.in_([c.NEW_STATUS, c.COMPLETED_STATUS])).all()
                               if a not in assigned_ids]
 
 
@@ -205,7 +208,8 @@ def _get_unassigned(session, assigned_ids):
                                               .order_by(Attendee.full_name)
                                               .join(Attendee.hotel_requests)
                                               .filter(Attendee.hotel_requests != None,
-                                                      HotelRequests.nights != '').all()
+                                                      HotelRequests.nights != '',
+                                                      Attendee.badge_status.in_([c.NEW_STATUS, c.COMPLETED_STATUS])).all()
                               if a.id not in assigned_ids]
 
 
