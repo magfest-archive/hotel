@@ -3,10 +3,11 @@ from hotel import *
 
 @all_renderable(c.PEOPLE)
 class Root:
+    # TODO: handle people who didn't request setup / teardown but who were assigned to a setup / teardown room
     def setup_teardown(self, session):
         attendees = []
         for hr in session.query(HotelRequests).filter_by(approved=True).options(joinedload(HotelRequests.attendee)).all():
-            if hr.setup_teardown and hr.attendee.takes_shifts:
+            if hr.setup_teardown and hr.attendee.takes_shifts and hr.attendee.badge_status in [c.NEW_STATUS, c.COMPLETED_STATUS]:
                 reasons = []
                 if hr.attendee.setup_hotel_approved and not any([shift.job.is_setup for shift in hr.attendee.shifts]):
                     reasons.append('has no setup shifts')

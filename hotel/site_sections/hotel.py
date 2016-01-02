@@ -12,13 +12,18 @@ class Root:
             'checklist': session.checklist_status('hotel_eligible', department),
             'attendees': session.query(Attendee)
                                 .filter_by(hotel_eligible=True)
-                                .filter(Attendee.assigned_depts.contains(str(department)))
+                                .filter(Attendee.assigned_depts.contains(str(department)),
+                                        Attendee.badge_status.in_([c.NEW_STATUS, c.COMPLETED_STATUS]))
                                 .order_by(Attendee.full_name).all()
         }
 
     def requests(self, session, department=None):
         dept_filter = []
-        requests = session.query(HotelRequests).join(HotelRequests.attendee).options(joinedload(HotelRequests.attendee)).order_by(Attendee.full_name).all()
+        requests = (session.query(HotelRequests)
+                           .join(HotelRequests.attendee)
+                           .options(joinedload(HotelRequests.attendee))
+                           .filter(Attendee.badge_status.in_([c.NEW_STATUS, c.COMPLETED_STATUS]))
+                           .order_by(Attendee.full_name).all())
         if department:
             dept_filter = [Attendee.assigned_depts.contains(department)]
             requests = [r for r in requests if r.attendee.assigned_to(department)]
@@ -33,9 +38,11 @@ class Root:
         }
 
     def hours(self, session):
-        staffers = session.query(Attendee).filter_by(badge_type=c.STAFF_BADGE).order_by(Attendee.full_name).all()
-        staffers = [s for s in staffers if s.hotel_shifts_required and s.weighted_hours < c.HOTEL_REQ_HOURS]
-        return {'staffers': staffers}
+        return {'staffers': [s for s in session.query(Attendee)
+                                               .filter(Attendee.badge_type == c.STAFF_BADGE,
+                                                       Attendee.badge_status.in_([c.NEW_STATUS, c.COMPLETED_STATUS]))
+                                               .order_by(Attendee.full_name).all()
+                               if s.hotel_shifts_required and s.weighted_hours < c.HOTEL_REQ_HOURS]}
 
     def no_shows(self, session):
         staffers = [ra.attendee for ra in session.query(RoomAssignment).all() if not ra.attendee.checked_in]
