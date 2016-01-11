@@ -7,7 +7,7 @@
 <input type="checkbox" ng-model="showLockedIn" /> Show Locked In Rooms
 
 <table style="width:auto">
-<tr ng-repeat="room in lists.rooms"><td style="border:1px solid black" ng-if="showLockedIn || !room.locked_in" ng-class="{'locked-in': room.locked_in}">
+<tr ng-repeat="room in lists.rooms" ng-if="showLockedIn || !room.locked_in"><td style="border:1px solid black" ng-class="{'locked-in': room.locked_in}">
     <b>{{ room.nights }}</b> &nbsp;
     <a href="#/edit-room/{{ room.id }}">Edit</a> &nbsp;
     <button ng-click="deleteRoom(room.id)">Delete</button>
