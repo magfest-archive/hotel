@@ -214,7 +214,7 @@ def _get_unassigned(session, assigned_ids):
 
 
 def _hotel_dump(session):
-    rooms = [_room_dict(room) for room in session.query(Room).order_by(Room.created).all()]
+    rooms = [_room_dict(room) for room in session.query(Room).order_by(Room.locked_in.desc(), Room.created).all()]
     assigned = sum([r['attendees'] for r in rooms], [])
     assigned_ids = [a['id'] for a in assigned]
     unassigned = _get_unassigned(session, assigned_ids)
