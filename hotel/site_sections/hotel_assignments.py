@@ -39,6 +39,10 @@ class Root:
             }]
         }
 
+    def goto_staffer_requests(self, id):
+        cherrypy.session['staffer_id'] = id
+        raise HTTPRedirect('../hotel_requests/index')
+
     @ajax
     def create_room(self, session, **params):
         params['nights'] = list(filter(bool, [params.pop(night, None) for night in c.NIGHT_NAMES]))
