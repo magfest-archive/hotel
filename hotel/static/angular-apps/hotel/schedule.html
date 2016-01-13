@@ -18,7 +18,8 @@
         <table>
             <tr ng-repeat="attendee in room.attendees">
                 <td valign="center"> <a href="#/attendee/{{ attendee.id }}">{{ attendee.name }}</a> </td>
-                <td valid="center"> &nbsp; {{ attendee.nights }} </td>
+                <td valign="center"> &nbsp; {{ attendee.nights }} </td>
+                <td valign="center"> &nbsp; <a href="goto_staffer_requests?id={{ attendee.id }}">Edit</a> </td>
                 <td valign="center"> &nbsp; <button ng-click="remove(attendee.id, room.id)">Remove</button> </td>
                 <td>
                     <div ng-if="wrongNights(room, attendee)" style="color:red">Room nights don't match attendee's requested nights.</div>
