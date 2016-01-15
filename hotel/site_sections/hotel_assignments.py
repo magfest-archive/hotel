@@ -201,6 +201,7 @@ class Root:
                     })
                 out.writerow(list(row.values()))
 
+
 def _attendee_dict(attendee):
     return {
         'id': attendee.id,
