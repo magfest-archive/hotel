@@ -134,7 +134,11 @@ class Room(MagModel, NightsMixin):
 
     @property
     def check_out_date(self):
-        return c.NIGHT_DATES[self.nights_labels[-1]] + timedelta(days=1)
+        # TODO: undo this kludgy workaround by fully implementing https://github.com/magfest/hotel/issues/39
+        if self.nights_labels[-1] == 'Monday':
+            return c.ESCHATON.date() + timedelta(days=1)
+        else:
+            return c.NIGHT_DATES[self.nights_labels[-1]] + timedelta(days=1)
 
 
 class RoomAssignment(MagModel):
