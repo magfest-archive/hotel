@@ -1,3 +1,5 @@
+from sqlalchemy.orm import subqueryload
+
 from uber.common import *
 from hotel._version import __version__
 from hotel.config import *
