@@ -4,15 +4,15 @@
 
 <h3> Rooms </h3>
 
-<input type="checkbox" ng-model="showLockedIn" /> Show Locked In Rooms
+<input type="checkbox" ng-model="showLockedIn" /> Show Notified Rooms
 
 <table style="width:auto">
 <tr ng-repeat="room in lists.rooms" ng-if="showLockedIn || !room.locked_in"><td style="border:1px solid black" ng-class="{'locked-in': room.locked_in}">
     <b>{{ room.nights }}</b> &nbsp;
     <a href="#/edit-room/{{ room.id }}">Edit</a> &nbsp;
     <button ng-click="deleteRoom(room.id)">Delete</button>
-    <button ng-if="!room.locked_in && room.attendees.length" ng-click="lockInRoom(room.id)">Lock In</button>
-    <span ng-if="room.locked_in" style="font-weight:bold">Locked In</span>
+    <button ng-if="!room.locked_in && room.attendees.length" ng-click="lockInRoom(room.id)">Notify</button>
+    <span ng-if="room.locked_in" style="font-weight:bold">Notified</span>
     <div ng-if="room.notes" style="font-style:italic">{{ room.notes }}</div>
     <div style="margin-top:5px">
         <table>
@@ -27,12 +27,8 @@
                 </td>
             </tr>
         </table>
-        <div ng-controller="AddController">
-            <div ng-if="lists.eligible.length">
-                Add an attendee:
-                <select ng-model="assignment.attendee_id" ng-options="attendee.id as attendee.name + ' (' + attendee.nights + ')' for attendee in lists.eligible"></select>
-                <button ng-click="add()">Add to Room</button>
-            </div>
+        <div>
+            <a href="#/add-to-room/{{ room.id }}">Add an attendee to this room</a>
         </div>
     </div>
 </td></tr>
