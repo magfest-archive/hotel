@@ -50,6 +50,7 @@ angular.module('hotel', ['ngRoute', 'magfest'])
             .when('/create-room', {controller: 'CreateController', templateUrl: '../static/angular-apps/hotel/room_form.html'})
             .when('/edit-room/:roomId', {controller: 'EditController', templateUrl: '../static/angular-apps/hotel/room_form.html'})
             .when('/attendee/:id', {controller: 'AttendeeController', templateUrl: '../static/angular-apps/hotel/attendee.html'})
+            .when('/add-to-room/:roomId', {controller: 'AddController', templateUrl: '../static/angular-apps/hotel/add_to_room.html'})
             .otherwise({redirectTo: '/'});
     })
     .controller('HotelController', function($scope, $http, Hotel, errorHandler) {
@@ -124,19 +125,22 @@ angular.module('hotel', ['ngRoute', 'magfest'])
             $location.path('/');
         };
     })
-    .controller('AddController', function($scope, $http, Hotel, errorHandler) {
+    .controller('AddController', function ($scope, $http, $location, $routeParams, Hotel, errorHandler) {
+        $scope.room = Hotel.get('rooms', $routeParams.roomId);
         $scope.assignment = {
             room_id: $scope.room.id,
-            attendee_id: $scope.lists.eligible[0] && $scope.lists.eligible[0].id
+            attendee_id: _.get($scope.lists.eligible[0], 'id')
         };
-        $scope.isSetupOrTeardown = function (modelWithNights) {    // TODO: this would be a one-liner in lodash
-            var nonCore = false;
-            angular.forEach($scope.NIGHTS, function (night) {
-                nonCore = nonCore || !night.core && modelWithNights[night.name];
+        $scope.isSetupOrTeardown = function (modelWithNights) {
+            return _($scope.NIGHTS).any(function (night) {
+                !night.core && modelWithNights[night.name];
             });
-            return Boolean(nonCore);
         };
-        $scope.add = function() {
+        $scope.cancel = function () {
+            $location.path('/');
+        };
+        $scope.add = function () {
+            $scope.lists = Hotel.lists;
             var room = Hotel.get('rooms', $scope.assignment.room_id);
             var attendee = Hotel.get('eligible', $scope.assignment.attendee_id);
             var autoDecline = !attendee.approved && $scope.isSetupOrTeardown(attendee.nights_lookup) && !$scope.isSetupOrTeardown(room);
@@ -146,7 +150,11 @@ angular.module('hotel', ['ngRoute', 'magfest'])
                     method: 'post',
                     url: 'assign_to_room',
                     params: $scope.assignment
-                }).success(Hotel.set).error(errorHandler);
+                }).then(function (response) {
+                    Hotel.set(response.data);
+                }).catch(errorHandler).finally(function () {
+                    $location.path('/');
+                });
             }
         };
     })
