@@ -34,18 +34,24 @@ class Root:
             'declined_count': len([r for r in requests if r.nights == '']),
             'dept_name': 'All' if not department else c.JOB_LOCATIONS[int(department)],
             'checklist': session.checklist_status('approve_setup_teardown', department),
-            'staffer_count': session.query(Attendee).filter(Attendee.badge_type == c.STAFF_BADGE, *dept_filter).count()
+            'staffer_count': session.query(Attendee).filter(Attendee.hotel_eligible == True, *dept_filter).count()
         }
 
     def hours(self, session):
         return {'staffers': [s for s in session.query(Attendee)
-                                               .filter(Attendee.badge_type == c.STAFF_BADGE,
+                                               .filter(Attendee.hotel_eligible == True,
                                                        Attendee.badge_status.in_([c.NEW_STATUS, c.COMPLETED_STATUS]))
+                                               .options(joinedload(Attendee.hotel_requests),
+                                                        subqueryload(Attendee.shifts).subqueryload(Shift.job))
                                                .order_by(Attendee.full_name).all()
                                if s.hotel_shifts_required and s.weighted_hours < c.HOTEL_REQ_HOURS]}
 
     def no_shows(self, session):
-        staffers = [ra.attendee for ra in session.query(RoomAssignment).all() if not ra.attendee.checked_in]
+        attendee_load = joinedload(RoomAssignment.attendee)
+        staffers = [ra.attendee for ra in session.query(RoomAssignment)
+                                                 .options(attendee_load.joinedload(Attendee.hotel_requests),
+                                                          attendee_load.subqueryload(Attendee.room_assignments))
+                                if not ra.attendee.checked_in]
         return {'staffers': sorted(staffers, key=lambda a: a.full_name)}
 
     @ajax

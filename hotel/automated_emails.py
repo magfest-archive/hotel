@@ -1,6 +1,10 @@
 from hotel import *
 
-AutomatedEmail.extra_models[Room] = lambda session: session.query(Room).all()
+AutomatedEmail.queries[Room] = lambda session: session.query(Room).options(subqueryload(Room.assignments).subqueryload(RoomAssignment.attendee))
+
+# add subqueryload to existing query
+orig_query = AutomatedEmail.queries[Attendee]
+AutomatedEmail.queries[Attendee] = lambda session: orig_query(session).options(subqueryload(Attendee.hotel_requests))
 
 AutomatedEmail(Attendee, 'Want volunteer hotel room space at {EVENT_NAME}?', 'hotel_rooms.txt',
            lambda a: days_before(45, c.ROOM_DEADLINE, 14) and c.AFTER_SHIFTS_CREATED and a.hotel_eligible, sender=c.ROOM_EMAIL_SENDER)
