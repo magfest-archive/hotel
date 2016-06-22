@@ -16,10 +16,10 @@ AutomatedEmail(Attendee, 'Last chance to sign up for {EVENT_NAME} hotel room spa
            lambda a: days_before(2, c.ROOM_DEADLINE) and a.hotel_eligible and not a.hotel_requests, sender=c.ROOM_EMAIL_SENDER)
 
 AutomatedEmail(Attendee, 'Reminder to meet your {EVENT_NAME} hotel room requirements', 'hotel_hours.txt',
-           lambda a: days_before(14, c.UBER_TAKEDOWN, 7) and a.hotel_shifts_required and a.weighted_hours < c.HOTEL_REQ_HOURS, sender=c.ROOM_EMAIL_SENDER)
+           lambda a: days_before(14, c.FINAL_EMAIL_DEADLINE, 7) and a.hotel_shifts_required and a.weighted_hours < c.HOTEL_REQ_HOURS, sender=c.ROOM_EMAIL_SENDER)
 
 AutomatedEmail(Attendee, 'Final reminder to meet your {EVENT_NAME} hotel room requirements', 'hotel_hours.txt',
-           lambda a: days_before(7, c.UBER_TAKEDOWN) and a.hotel_shifts_required and a.weighted_hours < c.HOTEL_REQ_HOURS, sender=c.ROOM_EMAIL_SENDER)
+           lambda a: days_before(7, c.FINAL_EMAIL_DEADLINE) and a.hotel_shifts_required and a.weighted_hours < c.HOTEL_REQ_HOURS, sender=c.ROOM_EMAIL_SENDER)
 
 AutomatedEmail(Room, '{EVENT_NAME} Hotel Room Assignment', 'room_assignment.txt', lambda r: r.locked_in,
                sender=c.ROOM_EMAIL_SENDER)

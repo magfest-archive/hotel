@@ -29,6 +29,6 @@ for _attr in ['CORE_NIGHT', 'SETUP_NIGHT', 'TEARDOWN_NIGHT']:
 @Config.mixin
 class ExtraConfig:
     @property
-    def ONE_WEEK_OR_TAKEDOWN(self):
+    def ONE_WEEK_OR_TAKEDOWN_OR_EPOCH(self):
         week_from_now = c.EVENT_TIMEZONE.localize(datetime.combine(date.today() + timedelta(days=7), time(23, 59)))
-        return min(week_from_now, c.UBER_TAKEDOWN)
+        return min(week_from_now, c.UBER_TAKEDOWN, c.EPOCH)
