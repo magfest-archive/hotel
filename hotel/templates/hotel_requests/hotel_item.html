@@ -1,6 +1,8 @@
+{% import 'macros.html' as macros %}
+
 {% if attendee.hotel_eligible and c.AFTER_ROOM_DEADLINE and c.HAS_STAFF_ROOMS_ACCESS %}
     <li>
-        {% checked_if attendee.hotel_requests %}
+        {{ macros.checklist_image(attendee.hotel_requests) }}
         The deadline for editing hotel requests has passed, but as a STOPS admin, you can still
         {% if attendee.hotel_requests %}
             <a href="../hotel_requests">edit</a>
@@ -12,7 +14,7 @@
 {% elif attendee.hotel_eligible and attendee.registered < c.ROOM_DEADLINE %}
     {% if c.BEFORE_ROOM_DEADLINE %}
         <li>
-            {% checked_if attendee.hotel_requests %}
+            {{ macros.checklist_image(attendee.hotel_requests) }}
             {% if not attendee.placeholder and attendee.food_restrictions and attendee.shirt_size_marked and not attendee.hotel_requests %}
                 <a href="../hotel_requests">Tell us</a>
             {% else %}
@@ -25,7 +27,7 @@
         </li>
     {% else %}
         <li>
-            {% checked_if attendee.hotel_requests %}
+            {{ macros.checklist_image(attendee.hotel_requests) }}
             {% if attendee.hotel_requests %}
                 Thanks for filling out the hotel space request form before the deadline.
             {% else %}
