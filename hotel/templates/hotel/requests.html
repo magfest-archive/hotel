@@ -59,9 +59,9 @@
     <td>Extra Nights</td>
 </tr>
 {% for request in requests %}
-    <tr bgcolor="{% cycle #FFFFFF,#DDDDDD %}">
+    <tr bgcolor="{{ loop.cycle('#FFFFFF','#DDDDDD') }}">
         <td><a href="../registration/form?id={{ request.attendee.id }}">{{ request.attendee.full_name }}</a></td>
-        <td>{{ request.attendee.assigned_depts_labels|join:" / " }}</td>
+        <td>{{ request.attendee.assigned_depts_labels|join(" / ") }}</td>
         <td>{{ request.wanted_roommates|linebreaksbr }}</td>
         <td>{{ request.unwanted_roommates|linebreaksbr }}</td>
         <td>{{ request.special_needs }}</td>

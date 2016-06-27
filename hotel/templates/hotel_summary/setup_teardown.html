@@ -10,7 +10,7 @@
     {% for attendee, reasons in grouped %}
         <tr>
             <td>{{ attendee|form_link }}</td>
-            <td>{{ attendee.assigned_depts_labels|join:" / " }}</td>
+            <td>{{ attendee.assigned_depts_labels|join(" / ") }}</td>
             <td>{{ attendee.hotel_requests.nights_display }}</td>
         </tr>
         <tr>
