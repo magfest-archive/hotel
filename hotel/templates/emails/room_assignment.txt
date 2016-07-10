@@ -2,10 +2,10 @@
 
 This email is to confirm your upcoming {{ c.EVENT_NAME }} hotel staff room assignments.  Your roommates are listed below, so please take a moment to look over the information.  We will assume that all rooms are ok if you don’t reply to this email by {{ c.ONE_WEEK_OR_TAKEDOWN_OR_EPOCH|datetime }}.
 
-You can check in at the hotel front desk starting at {{ c.CHECK_IN_TIME }} on {{ room.check_in_date|date:"l, M j" }}.
+You can check in at the hotel front desk starting at {{ c.CHECK_IN_TIME }} on {{ room.check_in_date|date("l, M j") }}.
 PLEASE - Make sure this is the first thing you do when you get onsite. If you have problems, come to {{ c.EVENT_NAME }} Operations Department to get it resolved.
 
-Your check-out is at {{ c.CHECK_OUT_TIME }} on {{ room.check_out_date|date:"l, M j" }}.  You do not need to drop off your room keys at the front desk; all you need to do is simply vacate the room by that time.  If for any reason you need additional time to vacate the room, please call the hotel front desk to see if you can have additional time.  If the hotel provides additional time, then you need to comply with the time provided.  Do not expect that this will be provided.
+Your check-out is at {{ c.CHECK_OUT_TIME }} on {{ room.check_out_date|date("l, M j") }}.  You do not need to drop off your room keys at the front desk; all you need to do is simply vacate the room by that time.  If for any reason you need additional time to vacate the room, please call the hotel front desk to see if you can have additional time.  If the hotel provides additional time, then you need to comply with the time provided.  Do not expect that this will be provided.
 
 Here are the people assigned to this room, along with their contact information and what nights they'll be using the room:
 {% for ra in room.assignments %}
