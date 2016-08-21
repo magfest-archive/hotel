@@ -162,7 +162,7 @@ class Root:
                     'Q2',  # code for two beds, 'K1' would indicate a single king-sized bed
                     '1',
                     len(assignments),
-                    '', '', room.notes, '', '', ''  # no credit card info in this spreadsheet
+                    '', '', room.notes, '', '', '', ''  # no credit card info in this spreadsheet
                 ] + sum(roommates, []))
 
     @csv_file
