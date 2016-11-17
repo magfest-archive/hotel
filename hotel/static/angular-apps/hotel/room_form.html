@@ -19,6 +19,10 @@
     <td> <textarea ng-model="room.message" rows="3" cols="80"></textarea> </td>
 </tr>
 <tr>
+    <td valign="top">How Many Of This Type?</td>
+    <td><input type="number" min="1" value="1" ng-model="room.count"></td>
+</tr>
+<tr>
     <td></td>
     <td>
         <button ng-click="save()">Save</button> &nbsp;

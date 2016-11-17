@@ -46,7 +46,8 @@ class Root:
     @ajax
     def create_room(self, session, **params):
         params['nights'] = list(filter(bool, [params.pop(night, None) for night in c.NIGHT_NAMES]))
-        session.add(session.room(params))
+        for x in range(int(params['count'])):
+            session.add(session.room(params))
         session.commit()
         return _hotel_dump(session)
 
