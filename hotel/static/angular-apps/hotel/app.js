@@ -125,7 +125,7 @@ angular.module('hotel', ['ngRoute', 'magfest'])
             $location.path('/');
         };
     })
-    .controller('AddController', function ($scope, $http, $location, $routeParams, Hotel, errorHandler) {
+    .controller('AddController', function ($scope, $http, $location, $routeParams, $window, Hotel, errorHandler) {
         $scope.room = Hotel.get('rooms', $routeParams.roomId);
         $scope.assignment = {
             room_id: $scope.room.id,
@@ -153,7 +153,7 @@ angular.module('hotel', ['ngRoute', 'magfest'])
                 }).then(function (response) {
                     Hotel.set(response.data);
                 }).catch(errorHandler).finally(function () {
-                    $location.path('/');
+                    $window.location.reload();
                 });
             }
         };
