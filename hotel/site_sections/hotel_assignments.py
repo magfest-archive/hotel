@@ -46,7 +46,7 @@ class Root:
     @ajax
     def create_room(self, session, **params):
         params['nights'] = list(filter(bool, [params.pop(night, None) for night in c.NIGHT_NAMES]))
-        loops = int(params['count']) if params['count'] else 1
+        loops = int(params['count']) if params.get("count") else 1
         for x in range(loops):
             session.add(session.room(params))
         session.commit()
