@@ -63,3 +63,11 @@ class Root:
             hr.decline()
         session.commit()
         return {'nights': hr.nights_display}
+
+    @ajax
+    def switch_hotel_eligibility(self, session, id, **params):
+        attendee = session.query(Attendee).filter(Attendee.id == id).first()
+        if attendee:
+            attendee.hotel_eligible = not attendee.hotel_eligible
+            session.commit()
+            return True

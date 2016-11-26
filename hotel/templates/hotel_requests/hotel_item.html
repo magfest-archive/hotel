@@ -1,4 +1,5 @@
-{% if attendee.hotel_eligible and c.AFTER_ROOM_DEADLINE and c.HAS_STAFF_ROOMS_ACCESS %}
+{% if c.HAS_STAFF_ROOMS_ACCESS %}
+    {% if attendee.hotel_eligible and c.AFTER_ROOM_DEADLINE %}
     <li>
         {% checked_if attendee.hotel_requests %}
         The deadline for editing hotel requests has passed, but as a STOPS admin, you can still
@@ -9,6 +10,33 @@
         {% endif %}
         this staffer's hotel room space requests.
     </li>
+    {% elif not attendee.hotel_eligible%}
+    <li>
+        <form id="enableHotel">
+            {% csrf_token %}
+            <input id="a_id" type="text" value="{{ attendee.id }}" class="hidden">
+            <input type="submit" value="Enable Hotel Eligibility">
+        </form>
+         <b>This attendee is not eligible for hotel space, but as a STOPS admin, you may override this</b>
+    </li>
+        <script>
+        $("#enableHotel").submit(function(e){
+            e.preventDefault();
+            $.ajax({
+                url: "../hotel/switch_hotel_eligibility",
+                data: {
+                    csrf_token: csrf_token,
+                    id: $("#a_id").val()
+                },
+                success: function(){
+                  window.location.reload()
+                },
+                type: "POST"
+            });
+        });
+
+        </script>
+    {% endif %}
 {% elif attendee.hotel_eligible and attendee.registered < c.ROOM_DEADLINE %}
     {% if c.BEFORE_ROOM_DEADLINE %}
         <li>
@@ -34,3 +62,4 @@
         </li>
     {% endif %}
 {% endif %}
+
