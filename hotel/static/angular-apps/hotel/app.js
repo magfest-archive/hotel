@@ -83,7 +83,7 @@ angular.module('hotel', ['ngRoute', 'magfest'])
         };
     })
     .controller('CreateController', function($scope, $http, $location, errorHandler, Hotel) {
-        $scope.room = {notes: ''};
+        $scope.room = {notes: '',  count: 1};
         $scope.nights = [];
         angular.forEach($scope.NIGHTS, function (night) {
             $scope.nights.push(angular.extend({checked: night.core}, night));
