@@ -1,0 +1,9 @@
+{% extends "registration/review-base.html" %}
+
+{# This is kind of a hack, it defines a way that admins can force marking someone as hotel eligible. #}
+{# When we switch from Django to Jinja2, this can be injected into the main registration form #}
+{% block extra %}
+    {% if 'Hotel Eligibility' in attendee.for_review and c.HAS_STAFF_ROOMS_ACCESS %}
+        ++++++ <a href="../hotel/mark_hotel_eligible?id={{ attendee.id }}">Admin: Force mark as hotel eligible</a>
+    {% endif %}
+{% endblock extra %}
