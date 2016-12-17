@@ -118,6 +118,7 @@ class Room(MagModel, NightsMixin):
     locked_in  = Column(Boolean, default=False)
     nights     = Column(MultiChoice(c.NIGHT_OPTS))
     created    = Column(UTCDateTime, server_default=utcnow())
+    updated    = Column(UTCDateTime, server_default=utcnow(), onupdate=utcnow())
     assignments = relationship('RoomAssignment', backref='room')
 
     @property

@@ -196,6 +196,7 @@ class Root:
                 row = blank.copy()
                 row.update({
                     'CustomField1': room.notes,
+                    'CustomField2': room.updated,
                     'NumberofGuests': min(4, len(room.assignments)),
                     'CheckInDate': room.check_in_date.strftime('%m/%d/%Y'),
                     'CheckOutDate': room.check_out_date.strftime('%m/%d/%Y')
