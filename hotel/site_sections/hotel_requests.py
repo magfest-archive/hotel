@@ -3,7 +3,6 @@ from hotel import *
 
 @all_renderable(c.SIGNUPS)
 class Root:
-    @check_shutdown
     def index(self, session, message='', decline=None, **params):
         if c.AFTER_ROOM_DEADLINE and c.STAFF_ROOMS not in AdminAccount.access_set():
             raise HTTPRedirect('../signups/index?message={}', 'The room deadline has passed')
