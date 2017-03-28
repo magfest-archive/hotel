@@ -20,7 +20,7 @@
             {% else %}
                 Tell us
             {% endif %}
-            whether you want hotel room space no later than <b>{{ c.ROOM_DEADLINE|datetime }}</b>
+            whether you want hotel room space no later than <b>{{ c.ROOM_DEADLINE|datetime_local }}</b>
             {% if attendee.hotel_requests %}
                 (you may <a href="../hotel_requests">edit your request</a> until then).
             {% endif %}
