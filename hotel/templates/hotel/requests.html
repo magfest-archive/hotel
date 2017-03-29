@@ -23,7 +23,7 @@
     </script>
     <select id="deptDropdown" onChange="deptChanged()">
         <option value="">All Departments</option>
-        {% options c.JOB_LOCATION_OPTS department %}
+        {{ options(c.JOB_LOCATION_OPTS,department) }}
     </select>
     {% if checklist.relevant %}
         <br/>
@@ -32,7 +32,7 @@
         {% else %}
             <a href="#" onClick="$('#checkoff').show(); return false;">I have approved everyone who should be approved</a>
             <form id="checkoff" style="display:none" method="post" action="../dept_checklist/mark_item_complete">
-            {% csrf_token %}
+            {{ csrf_token() }}
             <input type="hidden" name="slug" value="{{ checklist.conf.slug }}" />
             <input type="submit" value="No One Else Needs To Be Approved" />
             </form>
@@ -59,9 +59,9 @@
     <td>Extra Nights</td>
 </tr>
 {% for request in requests %}
-    <tr bgcolor="{% cycle #FFFFFF,#DDDDDD %}">
+    <tr bgcolor="{{ loop.cycle('#FFFFFF','#DDDDDD') }}">
         <td><a href="../registration/form?id={{ request.attendee.id }}">{{ request.attendee.full_name }}</a></td>
-        <td>{{ request.attendee.assigned_depts_labels|join:" / " }}</td>
+        <td>{{ request.attendee.assigned_depts_labels|join(" / ") }}</td>
         <td>{{ request.wanted_roommates|linebreaksbr }}</td>
         <td>{{ request.unwanted_roommates|linebreaksbr }}</td>
         <td>{{ request.special_needs }}</td>
