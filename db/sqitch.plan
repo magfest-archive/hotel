@@ -1,5 +1,0 @@
-%syntax-version=1.0.0
-%project=hotel
-%uri=https://github.com/magfest/hotel
-
-add-hotel-plugin 2015-09-01T14:02:37Z vagrant <vagrant@localhost> # Add initial hotel plugin.
