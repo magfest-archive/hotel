@@ -92,6 +92,32 @@ class Attendee:
         else:
             return 'Hotel nights: ' + hr.nights_display
 
+    @property
+    def legal_first_name(self):
+        """
+        Hotel exports need split legal names, but we don't collect split legal names, so we're going to have to guess.
+
+        Returns one of the following:
+            The first part of the legal name before a space, if the legal name has multiple parts
+            The legal name itself, if the legal name is one word -- this is because attendees are more likely to use a
+                different first name than their legal name, so might just enter, e.g., "Victoria" for their legal name
+            The first name, if there is no legal name
+        """
+        if self.legal_name:
+            return self.legal_name.split(' ', 1)[0] if ' ' in self.legal_name else self.legal_name
+        return self.first_name
+
+    @property
+    def legal_last_name(self):
+        """
+        Hotel exports need split legal names, but we don't collect split legal names, so we're going to have to guess.
+
+        Returns one of the following:
+            The second part of the legal name after a space, if the legal name has multiple parts
+            The last name, if there is no legal name or if the legal name is just one word
+        """
+        return self.legal_name.split(' ', 1)[1] if self.legal_name and ' ' in self.legal_name else self.last_name
+
 
 class HotelRequests(MagModel, NightsMixin):
     attendee_id        = Column(UUID, ForeignKey('attendee.id'), unique=True)
