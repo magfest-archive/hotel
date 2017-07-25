@@ -155,10 +155,10 @@ class Root:
         for room in session.query(Room).order_by(Room.created).all():
             if room.assignments:
                 assignments = [ra.attendee for ra in room.assignments[:4]]
-                roommates = [[a.last_name, a.first_name] for a in assignments[1:]] + [['', '']] * (4 - len(assignments))
+                roommates = [[a.legal_name.split(' ', 1)[1], a.legal_name.split(' ', 1)[0]] for a in assignments[1:]] + [['', '']] * (4 - len(assignments))
                 out.writerow([
-                    assignments[0].last_name,
-                    assignments[0].first_name,
+                    assignments[0].legal_name.split(' ', 1)[1],
+                    assignments[0].legal_name.split(' ', 1)[0],
                     room.check_in_date.strftime('%Y-%m-%d'),
                     room.check_out_date.strftime('%Y-%m-%d'),
                     'Q2',  # code for two beds, 'K1' would indicate a single king-sized bed
@@ -203,8 +203,8 @@ class Root:
                 for i, attendee in enumerate([ra.attendee for ra in room.assignments[:4]]):
                     prefix = 'Guest{}'.format(i + 1)
                     row.update({
-                        prefix + 'FirstName': attendee.first_name,
-                        prefix + 'LastName': attendee.last_name
+                        prefix + 'FirstName': attendee.legal_name.split(' ', 1)[0],
+                        prefix + 'LastName': attendee.legal_name.split(' ', 1)[1]
                     })
                 out.writerow(list(row.values()))
 
