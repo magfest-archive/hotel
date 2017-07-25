@@ -56,7 +56,7 @@ class Attendee:
 
     @property
     def hotel_shifts_required(self):
-        return bool(c.SHIFTS_CREATED and self.hotel_nights and self.ribbon != c.DEPT_HEAD_RIBBON and self.takes_shifts)
+        return bool(c.SHIFTS_CREATED and self.hotel_nights and c.DEPT_HEAD_RIBBON not in self.ribbon_ints and self.takes_shifts)
 
     @property
     def setup_hotel_approved(self):
