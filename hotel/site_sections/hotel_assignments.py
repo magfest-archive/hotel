@@ -147,25 +147,44 @@ class Root:
     @csv_file
     def mark_center(self, out, session):
         """spreadsheet in the format requested by the Hilton Mark Center"""
-        out.writerow(['Last Name', 'First Name', 'Arrival Date', 'Departure Date', 'Room Rate',
-                      'Room Type', 'Number Rooms', 'Number of Adults', 'Smoking No-Smoke', 'Billing Code',
-                      'Hotel Comments', 'Credit Card Name', 'Credit Card Number',
-                      'Credit Card Expiration', 'Last Name 2', 'First Name 2', 'Last Name 3',
-                      'First Name 3', 'Last Name 4', 'First Name 4'])
+        out.writerow([
+            'Last Name',
+            'First Name',
+            'Arrival',
+            'Departure',
+            'Room Type',
+            'Number of Adults',
+            'Credit Card Name',
+            'Credit Card Number',
+            'Credit Card Expiration',
+            'Last Name 2',
+            'First Name 2',
+            'Last Name 3',
+            'First Name 3',
+            'Last Name 4',
+            'First Name 4',
+            'comments'
+        ])
         for room in session.query(Room).order_by(Room.created).all():
             if room.assignments:
                 assignments = [ra.attendee for ra in room.assignments[:4]]
                 roommates = [[a.legal_last_name, a.legal_first_name] for a in assignments[1:]] + [['', '']] * (4 - len(assignments))
+                arrival = room.check_in_date.strftime('%-m/%-d/%Y')
+                departure = room.check_out_date.strftime('%-m/%-d/%Y')
                 out.writerow([
-                    assignments[0].legal_last_name,
-                    assignments[0].legal_first_name,
-                    room.check_in_date.strftime('%Y-%m-%d'),
-                    room.check_out_date.strftime('%Y-%m-%d'),
-                    'Q2',  # code for two beds, 'K1' would indicate a single king-sized bed
-                    '1',
-                    len(assignments),
-                    '', '', room.notes, '', '', '', ''  # no credit card info in this spreadsheet
-                ] + sum(roommates, []))
+                    assignments[0].legal_last_name,   # Last Name
+                    assignments[0].legal_first_name,  # First Name
+                    arrival,                          # Arrival
+                    departure,                        # Departure
+                    'Q2',                             # Room Type ('Q2' is 2 queen beds, 'K1' is 1 king bed)
+                    len(assignments),                 # Number of Adults
+                    '',                               # Credit Card Name
+                    '',                               # Credit Card Number
+                    ''                                # Credit Card Expiration
+                ] + sum(roommates, []) + [            # Last Name, First Name 2-4
+                    room.notes                        # comments
+                ])
+
 
     @csv_file
     def gaylord(self, out, session):
