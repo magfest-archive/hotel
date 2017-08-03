@@ -152,8 +152,14 @@ class Root:
             'First Name',
             'Arrival',
             'Departure',
+            'Hide',
             'Room Type',
+            'Hide',
             'Number of Adults',
+            'Hide',
+            'Hide',
+            'IPO',
+            'Individual Pays Own-',
             'Credit Card Name',
             'Credit Card Number',
             'Credit Card Expiration',
@@ -169,20 +175,28 @@ class Root:
             if room.assignments:
                 assignments = [ra.attendee for ra in room.assignments[:4]]
                 roommates = [[a.legal_last_name, a.legal_first_name] for a in assignments[1:]] + [['', '']] * (4 - len(assignments))
+                last_name = assignments[0].legal_last_name
+                first_name = assignments[0].legal_first_name
                 arrival = room.check_in_date.strftime('%-m/%-d/%Y')
                 departure = room.check_out_date.strftime('%-m/%-d/%Y')
                 out.writerow([
-                    assignments[0].legal_last_name,   # Last Name
-                    assignments[0].legal_first_name,  # First Name
-                    arrival,                          # Arrival
-                    departure,                        # Departure
-                    'Q2',                             # Room Type ('Q2' is 2 queen beds, 'K1' is 1 king bed)
-                    len(assignments),                 # Number of Adults
-                    '',                               # Credit Card Name
-                    '',                               # Credit Card Number
-                    ''                                # Credit Card Expiration
-                ] + sum(roommates, []) + [            # Last Name, First Name 2-4
-                    room.notes                        # comments
+                    last_name,              # Last Name
+                    first_name,             # First Name
+                    arrival,                # Arrival
+                    departure,              # Departure
+                    '',                     # Hide
+                    'Q2',                   # Room Type ('Q2' is 2 queen beds, 'K1' is 1 king bed)
+                    '',                     # Hide
+                    len(assignments),       # Number of Adults
+                    '',                     # Hide
+                    '',                     # Hide
+                    '',                     # IPO
+                    '',                     # Individual Pays Own-
+                    '',                     # Credit Card Name
+                    '',                     # Credit Card Number
+                    ''                      # Credit Card Expiration
+                ] + sum(roommates, []) + [  # Last Name, First Name 2-4
+                    room.notes              # comments
                 ])
 
 
