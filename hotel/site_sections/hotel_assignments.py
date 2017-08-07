@@ -199,7 +199,6 @@ class Root:
                     room.notes              # comments
                 ])
 
-
     @csv_file
     def gaylord(self, out, session):
         fields = [

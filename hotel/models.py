@@ -98,13 +98,20 @@ class Attendee:
         Hotel exports need split legal names, but we don't collect split legal names, so we're going to have to guess.
 
         Returns one of the following:
+            The first part of the legal name, if the legal name ends with the last name
             The first part of the legal name before a space, if the legal name has multiple parts
             The legal name itself, if the legal name is one word -- this is because attendees are more likely to use a
                 different first name than their legal name, so might just enter, e.g., "Victoria" for their legal name
             The first name, if there is no legal name
         """
         if self.legal_name:
-            return self.legal_name.split(' ', 1)[0] if ' ' in self.legal_name else self.legal_name
+            legal_name = self.legal_name.strip()
+            last_name = self.last_name.strip()
+            if legal_name.lower().endswith(last_name.lower()):
+                return legal_name[:-len(last_name)].strip()
+            else:
+                return legal_name.split(' ', 1)[0] if ' ' in legal_name else legal_name
+
         return self.first_name
 
     @property
@@ -113,10 +120,18 @@ class Attendee:
         Hotel exports need split legal names, but we don't collect split legal names, so we're going to have to guess.
 
         Returns one of the following:
+            The second part of the legal name, if the legal name starts with the legal first name
             The second part of the legal name after a space, if the legal name has multiple parts
             The last name, if there is no legal name or if the legal name is just one word
         """
-        return self.legal_name.split(' ', 1)[1] if self.legal_name and ' ' in self.legal_name else self.last_name
+        if self.legal_name:
+            legal_name = self.legal_name.strip()
+            legal_first_name = self.legal_first_name.strip()
+            if legal_name.lower().startswith(legal_first_name.lower()):
+                return legal_name[len(legal_first_name):].strip()
+            elif ' ' in legal_name:
+                return legal_name.split(' ', 1)[1]
+        return self.last_name
 
 
 class HotelRequests(MagModel, NightsMixin):

@@ -25,6 +25,30 @@ def test_hotel_shifts_required_preshifts(monkeypatch):
     assert not Attendee().hotel_shifts_required
 
 
+@pytest.mark.parametrize('first,last,legal,expected', [
+    ('First', 'Last', None, 'Last'),
+    ('First', 'Last', 'First Last', 'Last'),
+    ('First', 'Last', 'First Middle Last', 'Last'),
+    ('CRAZY', 'Last', 'First Last', 'Last'),
+    ('CRAZY', 'CRAZY', 'First Last', 'Last'),
+    ('CRAZY', 'CRAZY', 'First Middle Last', 'Middle Last'),
+])
+def test_legal_last_name(first, last, legal, expected):
+    assert expected == Attendee(first_name=first, last_name=last, legal_name=legal).legal_last_name
+
+
+@pytest.mark.parametrize('first,last,legal,expected', [
+    ('First', 'Last', None, 'First'),
+    ('First', 'Last', 'First Last', 'First'),
+    ('First', 'Last', 'First Middle Last', 'First Middle'),
+    ('CRAZY', 'Last', 'First Last', 'First'),
+    ('CRAZY', 'CRAZY', 'First Last', 'First'),
+    ('CRAZY', 'CRAZY', 'First Middle Last', 'First'),
+])
+def test_legal_first_name(first, last, legal, expected):
+    assert expected == Attendee(first_name=first, last_name=last, legal_name=legal).legal_first_name
+
+
 class TestHotelRequests:
 
     @pytest.fixture(autouse=True)
