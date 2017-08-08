@@ -1,6 +1,117 @@
 from hotel import *
 
 
+# The order of name_suffixes is important. It should be sorted in descending
+# order, using the length of the suffix with periods removed.
+name_suffixes = [
+    'Sisters of Our Lady of Charity of the Good Shepherd',
+    'Sisters of Holy Names of Jesus and Mary',
+    'Sisters of Holy Names of Jesus & Mary',
+    'United States Marine Corps Reserve',
+    'Certified Fund Raising Executive',
+    'United States Air Force Reserve',
+    'Doctor of Veterinary Medicine',
+    'Society of Holy Child Jesus',
+    'Certified Public Accountant',
+    'United States Navy Reserve',
+    'United States Marine Corps',
+    'United States Army Reserve',
+    'Sister of Saint Mary Order',
+    'Registered Nurse Clinician',
+    'Congregation of Holy Cross',
+    'Chartered Life Underwriter',
+    'United States Coast Guard',
+    'Doctor of Dental Medicine',
+    'Doctor of Dental Surgery',
+    'United States Air Force',
+    'Doctor of Chiropractic',
+    'Protestant Episcopal',
+    'Order of St Benedict',
+    'Sisters of St. Joseph',
+    'Doctor of Philosophy',
+    'Doctor of Osteopathy',
+    'Doctor of Education',
+    'Blessed Virgin Mary',
+    'Doctor of Optometry',
+    'United States Navy',
+    'United States Army',
+    'Doctor of Divinity',
+    'Doctor of Medicine',
+    'Society of Jesus',
+    'Registered Nurse',
+    'Police Constable',
+    'Post Commander',
+    'Doctor of Laws',
+    'Past Commander',
+    'Incorporated',
+    'Juris Doctor',
+    'The Fourth',
+    'The Second',
+    'The Third',
+    'The First',
+    'the 4th',
+    'the 3rd',
+    'the 2nd',
+    'the 1st',
+    'Retired',
+    'Limited',
+    'Esquire',
+    'Senior',
+    'Junior',
+    'USMCR',
+    'USAFR',
+    'USNR',
+    'USMC',
+    'USCG',
+    'USAR',
+    'USAF',
+    'S.S.M.O.',
+    'S.N.J.M.',
+    'S.H.C.J.',
+    'CFRE',
+    'USN',
+    'USA',
+    'R.N.C.',
+    'R.G.S',
+    'Ret.',
+    'O.S.B.',
+    'Ltd.',
+    'LL.D.',
+    'Inc.',
+    'Ed.D.',
+    'D.V.M.',
+    'C.S.J.',
+    'C.S.C.',
+    'CPA',
+    'CLU',
+    'B.V.M.',
+    'Ph.D.',
+    'D.M.D.',
+    'D.D.S.',
+    '4th',
+    '3rd',
+    '2nd',
+    '1st',
+    'III',
+    'Esq.',
+    'S.J.',
+    'R.N.',
+    'P.E.',
+    'P.C.',
+    'D.D.',
+    'D.C.',
+    'O.D.',
+    'M.D.',
+    'J.D.',
+    'D.O.',
+    'Sr.',
+    'Jr.',
+    'IV',
+    'II']
+
+normalized_name_suffixes = [re.sub(r'[,\.]', '', s.lower()) for s in name_suffixes]
+
+
 def _night(name):
     day = getattr(c, name.upper())
 
@@ -105,13 +216,32 @@ class Attendee:
             The first name, if there is no legal name
         """
         if self.legal_name:
-            legal_name = self.legal_name.strip()
-            last_name = self.last_name.strip()
-            if legal_name.lower().endswith(last_name.lower()):
+            legal_name = re.sub(r'\s+', ' ', self.legal_name.strip())
+            last_name = re.sub(r'\s+', ' ', self.last_name.strip())
+            low_legal_name = legal_name.lower()
+            low_last_name = last_name.lower()
+            if low_legal_name.endswith(low_last_name):
+                # Catches 95% of the cases.
                 return legal_name[:-len(last_name)].strip()
             else:
+                norm_legal_name = re.sub(r'[,\.]', '', low_legal_name)
+                norm_last_name = re.sub(r'[,\.]', '', low_last_name)
+                # Before iterating through all the suffixes, check to make
+                # sure the last name is even part of the legal name.
+                start_index = norm_legal_name.rfind(norm_last_name)
+                if start_index >= 0:
+                    actual_suffix = norm_legal_name[start_index + len(norm_last_name):].strip()
+                    for suffix in normalized_name_suffixes:
+                        actual_suffix = re.sub(suffix, '', actual_suffix).strip()
+                        if not actual_suffix:
+                            index = low_legal_name.rfind(low_last_name)
+                            if index >= 0:
+                                return legal_name[:index].strip()
+                            # Should never get here, but if we do, we should
+                            # stop iterating because none of the remaining
+                            # suffixes will match.
+                            break
                 return legal_name.split(' ', 1)[0] if ' ' in legal_name else legal_name
-
         return self.first_name
 
     @property
@@ -125,8 +255,8 @@ class Attendee:
             The last name, if there is no legal name or if the legal name is just one word
         """
         if self.legal_name:
-            legal_name = self.legal_name.strip()
-            legal_first_name = self.legal_first_name.strip()
+            legal_name = re.sub(r'\s+', ' ', self.legal_name.strip())
+            legal_first_name = re.sub(r'\s+', ' ', self.legal_first_name.strip())
             if legal_name.lower().startswith(legal_first_name.lower()):
                 return legal_name[len(legal_first_name):].strip()
             elif ' ' in legal_name:
