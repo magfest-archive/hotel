@@ -32,6 +32,11 @@ def test_hotel_shifts_required_preshifts(monkeypatch):
     ('CRAZY', 'Last', 'First Last', 'Last'),
     ('CRAZY', 'CRAZY', 'First Last', 'Last'),
     ('CRAZY', 'CRAZY', 'First Middle Last', 'Middle Last'),
+    ('Buster', 'Bluth', '  Byron  James  Bluth  III  ', 'Bluth III'),
+    ('Buster', 'Bluth', 'Byron James Bluth,III', 'Bluth,III'),
+    ('Bob', 'Brökken', 'Robert T. Brökken,  M.D.', 'Brökken, M.D.'),
+    ('Bob', 'Brökken', 'Robert T. Brökken,M.D.', 'Brökken,M.D.'),
+    ('Bob', 'Brökken', 'Robert T. BrökkenMD', 'BrökkenMD'),
 ])
 def test_legal_last_name(first, last, legal, expected):
     assert expected == Attendee(first_name=first, last_name=last, legal_name=legal).legal_last_name
@@ -44,6 +49,11 @@ def test_legal_last_name(first, last, legal, expected):
     ('CRAZY', 'Last', 'First Last', 'First'),
     ('CRAZY', 'CRAZY', 'First Last', 'First'),
     ('CRAZY', 'CRAZY', 'First Middle Last', 'First'),
+    ('Buster', 'Bluth', '  Byron  James  Bluth  III  ', 'Byron James'),
+    ('Buster', 'Bluth', 'Byron James Bluth,III', 'Byron James'),
+    ('Bob', 'Brökken', 'Robert T. Brökken,  M.D.', 'Robert T.'),
+    ('Bob', 'Brökken', 'Robert T. Brökken,M.D.', 'Robert T.'),
+    ('Bob', 'Brökken', 'Robert T. BrökkenMD', 'Robert T.'),
 ])
 def test_legal_first_name(first, last, legal, expected):
     assert expected == Attendee(first_name=first, last_name=last, legal_name=legal).legal_first_name
