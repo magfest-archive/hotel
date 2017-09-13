@@ -1,4 +1,5 @@
 from hotel import *
+from hotel.models import _generate_hotel_pin
 
 
 @all_renderable(c.STAFF_ROOMS)
@@ -239,6 +240,20 @@ class Root:
                         prefix + 'LastName': attendee.legal_last_name
                     })
                 out.writerow(list(row.values()))
+
+    @csv_file
+    def requested_hotel_info(self, out, session):
+        attendees_without_hotel_pin = session.query(Attendee).filter(
+                Attendee.requested_hotel_info == True,
+                Attendee.hotel_pin == None).all()
+        if attendees_without_hotel_pin:
+            for a in attendees_without_hotel_pin:
+                a.hotel_pin = _generate_hotel_pin()
+            session.commit()
+
+        out.writerow(['First Name', 'Last Name', 'E-mail Address', 'Password'])
+        for a in session.query(Attendee).filter_by(requested_hotel_info=True).order_by(Attendee.first_name, Attendee.last_name):
+            out.writerow([a.legal_first_name, a.legal_last_name, a.email, a.hotel_pin])
 
 
 def _attendee_dict(attendee):
