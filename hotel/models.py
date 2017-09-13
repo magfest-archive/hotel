@@ -1,3 +1,4 @@
+import random
 from hotel import *
 
 
@@ -112,6 +113,13 @@ name_suffixes = [
 normalized_name_suffixes = [re.sub(r'[,\.]', '', s.lower()) for s in name_suffixes]
 
 
+def _generate_hotel_pin():
+    """
+    Returns a 7 digit number formatted as a zero padded string.
+    """
+    return '{:07d}'.format(random.randint(0, 9999999))
+
+
 def _night(name):
     day = getattr(c, name.upper())
 
@@ -152,6 +160,9 @@ class Attendee:
     hotel_eligible = Column(Boolean, default=False, admin_only=True)
     hotel_requests = relationship('HotelRequests', backref=backref('attendee', load_on_pending=True), uselist=False)
     room_assignments  = relationship('RoomAssignment', backref=backref('attendee', load_on_pending=True))
+
+    # The PIN/password used by third party hotel reservervation systems
+    hotel_pin = Column(UnicodeText, nullable=True, default=_generate_hotel_pin)
 
     @presave_adjustment
     def staffer_hotel_eligibility(self):
