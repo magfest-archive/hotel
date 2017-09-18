@@ -243,16 +243,19 @@ class Root:
 
     @csv_file
     def requested_hotel_info(self, out, session):
-        attendees_without_hotel_pin = session.query(Attendee).filter(
-                Attendee.requested_hotel_info == True,
-                Attendee.hotel_pin == None).all()
+        hotel_query = session.query(Attendee).filter(
+            Attendee.badge_status != c.INVALID_STATUS,
+            Attendee.requested_hotel_info == True,
+            Attendee.first_name != '')
+
+        attendees_without_hotel_pin = hotel_query.filter(Attendee.hotel_pin == None).all()
         if attendees_without_hotel_pin:
             for a in attendees_without_hotel_pin:
                 a.hotel_pin = _generate_hotel_pin()
             session.commit()
 
         out.writerow(['First Name', 'Last Name', 'E-mail Address', 'Password'])
-        for a in session.query(Attendee).filter_by(requested_hotel_info=True).order_by(Attendee.first_name, Attendee.last_name):
+        for a in sorted(hotel_query.all(), key=lambda a: a.legal_first_name + ' ' + a.legal_last_name):
             out.writerow([a.legal_first_name, a.legal_last_name, a.email, a.hotel_pin])
 
 
