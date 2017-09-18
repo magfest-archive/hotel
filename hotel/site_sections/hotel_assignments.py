@@ -255,7 +255,7 @@ class Root:
             session.commit()
 
         out.writerow(['First Name', 'Last Name', 'E-mail Address', 'Password'])
-        for a in sorted(hotel_query.all(), key=lambda a: a.legal_name):
+        for a in sorted(hotel_query.all(), key=lambda a: a.legal_name or a.full_name):
             out.writerow([a.legal_first_name, a.legal_last_name, a.email, a.hotel_pin])
 
 
