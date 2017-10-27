@@ -3,49 +3,60 @@ from hotel import *
 
 @all_renderable(c.PEOPLE)
 class Root:
-    def index(self, session, department=None):
+    def index(self, session, department_id=None):
+        from uber.models.department import Department
         attendee = session.admin_attendee()
-        department = int(department or c.JOB_LOCATION_OPTS[0][0])
+        department_id = Department.to_id(department_id) if department_id \
+            else c.DEPARTMENT_OPTS[0][0]
         return {
-            'department': department,
-            'dept_name': c.JOB_LOCATIONS[department],
-            'checklist': session.checklist_status('hotel_eligible', department),
+            'department_id': department_id,
+            'department_name': c.DEPARTMENTS[department_id],
+            'checklist': session.checklist_status(
+                'hotel_eligible', department_id),
             'attendees': session.query(Attendee)
-                                .filter_by(hotel_eligible=True)
-                                .filter(Attendee.assigned_depts.contains(str(department)),
-                                        Attendee.badge_status.in_([c.NEW_STATUS, c.COMPLETED_STATUS]))
-                                .order_by(Attendee.full_name).all()
+                .filter(
+                    Attendee.hotel_eligible == True,
+                    Attendee.badge_status.in_(
+                        [c.NEW_STATUS, c.COMPLETED_STATUS]),
+                    Attendee.dept_memberships.any(
+                        department_id=department_id))
+                .order_by(Attendee.full_name).all()
         }
 
     def mark_hotel_eligible(self, session, id):
         """
         Force mark a non-staffer as eligible for hotel space.
-        This is outside the normal workflow, used for when we have a staffer that only has an attendee badge for
-        some reason, and we want to mark them as being OK to crash in a room.
+        This is outside the normal workflow, used for when we have a staffer
+        that only has an attendee badge for some reason, and we want to mark
+        them as being OK to crash in a room.
         """
         attendee = session.attendee(id)
         attendee.hotel_eligible = True
         session.commit()
-        return '{} has now been overridden as being hotel eligible'.format(attendee.full_name)
+        return '{} has now been overridden as being hotel eligible'.format(
+            attendee.full_name)
 
-    def requests(self, session, department=None):
-        dept_filter = []
-        requests = (session.query(HotelRequests)
-                           .join(HotelRequests.attendee)
-                           .options(joinedload(HotelRequests.attendee))
-                           .filter(Attendee.badge_status.in_([c.NEW_STATUS, c.COMPLETED_STATUS]))
-                           .order_by(Attendee.full_name).all())
-        if department:
-            dept_filter = [Attendee.assigned_depts.contains(department)]
-            requests = [r for r in requests if r.attendee.assigned_to(department)]
+    def requests(self, session, department_id=None):
+        dept_filter = [] if not department_id \
+            else [Attendee.dept_memberships.any(department_id=department_id)]
+
+        requests = session.query(HotelRequests) \
+            .join(HotelRequests.attendee) \
+            .options(joinedload(HotelRequests.attendee)) \
+            .filter(
+                Attendee.badge_status.in_([c.NEW_STATUS, c.COMPLETED_STATUS]),
+                *dept_filter) \
+            .order_by(Attendee.full_name).all()
 
         return {
             'requests': requests,
-            'department': department,
+            'department_id': department_id,
+            'department_name': c.DEPARTMENTS.get(department_id, 'All'),
             'declined_count': len([r for r in requests if r.nights == '']),
-            'dept_name': 'All' if not department else c.JOB_LOCATIONS[int(department)],
-            'checklist': session.checklist_status('approve_setup_teardown', department),
-            'staffer_count': session.query(Attendee).filter(Attendee.hotel_eligible == True, *dept_filter).count()
+            'checklist': session.checklist_status(
+                'approve_setup_teardown', department_id),
+            'staffer_count': session.query(Attendee).filter(
+                Attendee.hotel_eligible == True, *dept_filter).count()
         }
 
     def hours(self, session):

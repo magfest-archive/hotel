@@ -2,15 +2,15 @@
 {% block title %}Hotel Eligible Staffers{% endblock %}}
 {% block content %}
 
-<h2>{{ dept_name }} Hotel-Eligible Staffers</h2>
+<h2>{{ department_name }} Hotel-Eligible Staffers</h2>
 
 <div class="center">
     <select id="dept" onChange="deptChanged()">
-        {{ options(c.JOB_LOCATION_OPTS,department) }}
+        {{ options(c.DEPARTMENT_OPTS, department_id) }}
     </select>
     <script>
         var deptChanged = function () {
-            window.location = 'index?department=' + $('#dept').val();
+            window.location = 'index?department_id=' + $('#dept').val();
         };
     </script>
     <br/><br/>

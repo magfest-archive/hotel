@@ -1,12 +1,7 @@
 from hotel import *
 import pytest
-from sideboard.tests import patch_session
 
-
-@pytest.fixture(scope='session', autouse=True)
-def init_db(request):
-    patch_session(Session, request)
-    initialize_db()
+from uber.tests.conftest import *
 
 
 def test_hotel_shifts_required(monkeypatch):

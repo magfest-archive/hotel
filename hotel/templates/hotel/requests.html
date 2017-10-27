@@ -13,17 +13,17 @@
     }
 </script>
 
-<h2> {{ dept_name }} Hotel Requests </h2>
+<h2> {{ department_name }} Hotel Requests </h2>
 
 <div class="center">
     <script>
         var deptChanged = function () {
-            window.location = 'requests?department=' + $('#deptDropdown').val();
+            window.location = 'requests?department_id=' + $('#deptDropdown').val();
         };
     </script>
     <select id="deptDropdown" onChange="deptChanged()">
         <option value="">All Departments</option>
-        {{ options(c.JOB_LOCATION_OPTS,department) }}
+        {{ options(c.DEPARTMENT_OPTS, department_id) }}
     </select>
     {% if checklist.relevant %}
         <br/>
@@ -40,11 +40,13 @@
     {% endif %}
 </div>
 
-<table style="text-align:center ; font-weight: bold" cellspacing="25"><tr/>
-    <td>{{ staffer_count }} eligible Staffers</td>
-    <td>{{ requests|length }} requested hotel space</td>
-    <td>{{ declined_count }} declined hotel space</td>
-</tr></table>
+<div style="font-weight: bold">
+  {{ staffer_count }} eligible staffers
+  <br>
+  {{ requests|length }} requested hotel space
+  <br>
+  {{ declined_count }} declined hotel space
+</div>
 
 <br/>
 
