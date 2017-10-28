@@ -33,6 +33,7 @@
             <a href="#" onClick="$('#checkoff').show(); return false;">I have approved everyone who should be approved</a>
             <form id="checkoff" style="display:none" method="post" action="../dept_checklist/mark_item_complete">
             {{ csrf_token() }}
+            <input type="hidden" name="department_id" value="{{ department_id }}" />
             <input type="hidden" name="slug" value="{{ checklist.conf.slug }}" />
             <input type="submit" value="No One Else Needs To Be Approved" />
             </form>

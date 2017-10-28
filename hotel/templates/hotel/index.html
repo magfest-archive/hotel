@@ -22,6 +22,7 @@
             <div style="display:none" id="complete">
                 <form method="post" action="../dept_checklist/mark_item_complete">
                 {{ csrf_token() }}
+                <input type="hidden" name="department_id" value="{{ department_id }}" />
                 <input type="hidden" name="slug" value="{{ checklist.conf.slug }}" />
                 <input type="submit" value="I Confirm This All Looks Fine To Me" />
                 </form>
