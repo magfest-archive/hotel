@@ -3,11 +3,11 @@ from hotel import *
 
 @all_renderable(c.PEOPLE)
 class Root:
+    @department_id_adapter
     def index(self, session, department_id=None):
         from uber.models.department import Department
         attendee = session.admin_attendee()
-        department_id = Department.to_id(department_id) if department_id \
-            else c.DEPARTMENT_OPTS[0][0]
+        department_id = department_id or c.DEFAULT_DEPARTMENT_ID
         return {
             'department_id': department_id,
             'department_name': c.DEPARTMENTS[department_id],
@@ -36,6 +36,7 @@ class Root:
         return '{} has now been overridden as being hotel eligible'.format(
             attendee.full_name)
 
+    @department_id_adapter
     def requests(self, session, department_id=None):
         dept_filter = [] if not department_id \
             else [Attendee.dept_memberships.any(department_id=department_id)]
