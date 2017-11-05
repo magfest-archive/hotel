@@ -1,12 +1,7 @@
 from hotel import *
 import pytest
-from sideboard.tests import patch_session
 
-
-@pytest.fixture(scope='session', autouse=True)
-def init_db(request):
-    patch_session(Session, request)
-    initialize_db()
+from uber.tests.conftest import *
 
 
 def test_hotel_shifts_required(monkeypatch):
@@ -15,7 +10,8 @@ def test_hotel_shifts_required(monkeypatch):
     monkeypatch.setattr(Attendee, 'takes_shifts', True)
     monkeypatch.setattr(Attendee, 'hotel_nights', [c.THURSDAY, c.FRIDAY])
     assert Attendee().hotel_shifts_required
-    assert not Attendee(ribbon=c.DEPT_HEAD_RIBBON).hotel_shifts_required
+    monkeypatch.setattr(Attendee, 'is_dept_head', True)
+    assert not Attendee().hotel_shifts_required
 
 
 def test_hotel_shifts_required_preshifts(monkeypatch):
