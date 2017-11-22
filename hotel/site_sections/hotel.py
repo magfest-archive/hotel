@@ -49,7 +49,9 @@ class Root:
                 *dept_filter) \
             .order_by(Attendee.full_name).all()
 
+        admin_has_room_access = bool(set([c.ADMIN, c.STAFF_ROOMS]).intersection(session.current_admin_account().access_ints))
         return {
+            'admin_has_room_access': admin_has_room_access,
             'requests': requests,
             'department_id': department_id,
             'department_name': c.DEPARTMENTS.get(department_id, 'All'),

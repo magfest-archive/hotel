@@ -55,19 +55,24 @@
 <tr class="header">
     <td>Staffer Name</td>
     <td>Departments</td>
-    <td>Roommate Requests</td>
-    <td>Roommate Anti-requests</td>
-    <td>Special Needs</td>
+    {% if admin_has_room_access %}
+      <td>Roommate Requests</td>
+      <td>Roommate Anti-requests</td>
+      <td>Special Needs</td>
+    {% endif %}
     <td>Requested Nights</td>
     <td>Extra Nights</td>
 </tr>
+
 {% for request in requests %}
     <tr bgcolor="{{ loop.cycle('#FFFFFF','#DDDDDD') }}">
         <td><a href="../registration/form?id={{ request.attendee.id }}">{{ request.attendee.full_name }}</a></td>
         <td>{{ request.attendee.assigned_depts_labels|join(" / ") }}</td>
-        <td>{{ request.wanted_roommates|linebreaksbr }}</td>
-        <td>{{ request.unwanted_roommates|linebreaksbr }}</td>
-        <td>{{ request.special_needs }}</td>
+        {% if admin_has_room_access %}
+          <td>{{ request.wanted_roommates|linebreaksbr }}</td>
+          <td>{{ request.unwanted_roommates|linebreaksbr }}</td>
+          <td>{{ request.special_needs }}</td>
+        {% endif %}
         <td class="nights">{{ request.attendee.hotel_requests.nights_display }}</td>
         <td>
             {% if not request.setup_teardown %}
