@@ -192,7 +192,7 @@ class Attendee:
 
     @property
     def shift_prereqs_complete(self):
-        return not self.placeholder and self.food_restrictions_filled_out and self.shirt_size_marked \
+        return not self.placeholder and self.food_restrictions_filled_out and self.shirt_info_marked \
             and (not self.hotel_eligible or self.hotel_requests or not c.BEFORE_ROOM_DEADLINE)
 
     @property
