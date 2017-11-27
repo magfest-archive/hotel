@@ -288,35 +288,61 @@ def _room_dict(room):
 
 
 def _get_declined(session):
-    return [_attendee_dict(a) for a in session.query(Attendee)
-                                              .order_by(Attendee.full_name)
-                                              .join(Attendee.hotel_requests)
-                                              .filter(Attendee.hotel_requests != None,
-                                                      HotelRequests.nights == '',
-                                                      Attendee.badge_status.in_([c.NEW_STATUS, c.COMPLETED_STATUS])).all()]
+    query = session.query(Attendee).join(Attendee.hotel_requests) \
+        .options(
+            subqueryload(Attendee.hotel_requests),
+            subqueryload(Attendee.assigned_depts),
+            subqueryload(Attendee.room_assignments)) \
+        .filter(
+            Attendee.hotel_requests != None,
+            HotelRequests.nights == '',
+            Attendee.badge_status.in_([c.NEW_STATUS, c.COMPLETED_STATUS])) \
+        .order_by(Attendee.full_name, Attendee.id)
+    return [_attendee_dict(a) for a in query]
 
 
 def _get_unconfirmed(session, assigned_ids):
-    return [_attendee_dict(a) for a in session.query(Attendee)
-                                              .order_by(Attendee.full_name)
-                                              .filter(Attendee.hotel_eligible == True,
-                                                      Attendee.hotel_requests == None,
-                                                      Attendee.badge_status.in_([c.NEW_STATUS, c.COMPLETED_STATUS])).all()
-                              if a not in assigned_ids]
+    query = session.query(Attendee) \
+        .options(
+            subqueryload(Attendee.hotel_requests),
+            subqueryload(Attendee.assigned_depts),
+            subqueryload(Attendee.room_assignments)) \
+        .filter(
+            Attendee.hotel_eligible == True,
+            Attendee.hotel_requests == None,
+            Attendee.badge_status.in_([c.NEW_STATUS, c.COMPLETED_STATUS])) \
+        .order_by(Attendee.full_name, Attendee.id)
+    return [_attendee_dict(a) for a in query if a.id not in assigned_ids]
 
 
 def _get_unassigned(session, assigned_ids):
-    return [_attendee_dict(a) for a in session.query(Attendee)
-                                              .order_by(Attendee.full_name)
-                                              .join(Attendee.hotel_requests)
-                                              .filter(Attendee.hotel_requests != None,
-                                                      HotelRequests.nights != '',
-                                                      Attendee.badge_status.in_([c.NEW_STATUS, c.COMPLETED_STATUS])).all()
-                              if a.id not in assigned_ids]
+    query = session.query(Attendee).join(Attendee.hotel_requests) \
+        .options(
+            subqueryload(Attendee.hotel_requests),
+            subqueryload(Attendee.assigned_depts),
+            subqueryload(Attendee.room_assignments)) \
+        .filter(
+            Attendee.hotel_requests != None,
+            HotelRequests.nights != '',
+            Attendee.badge_status.in_([c.NEW_STATUS, c.COMPLETED_STATUS])) \
+        .order_by(Attendee.full_name, Attendee.id)
+    return [_attendee_dict(a) for a in query if a.id not in assigned_ids]
 
 
 def _hotel_dump(session):
-    rooms = [_room_dict(room) for room in session.query(Room).options(subqueryload(Room.assignments).subqueryload(RoomAssignment.attendee).subqueryload(Attendee.hotel_requests)).order_by(Room.locked_in.desc(), Room.created).all()]
+    room_query = session.query(Room).options(
+        subqueryload(Room.assignments)
+            .subqueryload(RoomAssignment.attendee)
+                .subqueryload(Attendee.hotel_requests),
+        subqueryload(Room.assignments)
+            .subqueryload(RoomAssignment.attendee)
+                .subqueryload(Attendee.assigned_depts),
+        subqueryload(Room.assignments)
+            .subqueryload(RoomAssignment.attendee)
+                .subqueryload(Attendee.room_assignments)) \
+        .order_by(Room.locked_in.desc(), Room.created)
+
+    rooms = [_room_dict(room) for room in room_query.all()]
     assigned = sum([r['attendees'] for r in rooms], [])
     assigned_ids = [a['id'] for a in assigned]
     unassigned = _get_unassigned(session, assigned_ids)
