@@ -259,7 +259,7 @@ class Root:
             out.writerow([a.legal_first_name, a.legal_last_name, a.email, a.hotel_pin])
 
 
-def _attendee_nights(attendee):
+def _attendee_nights_without_shifts(attendee):
     discrepancies = attendee.hotel_nights_without_shifts_that_day
     nights = []
     if attendee.hotel_requests:
@@ -272,7 +272,8 @@ def _attendee_dict(attendee):
     return {
         'id': attendee.id,
         'name': attendee.full_name,
-        'nights': _attendee_nights(attendee),
+        'nights': getattr(attendee.hotel_requests, 'nights_display', ''),
+        'nights_without_shifts': _attendee_nights_without_shifts(attendee),
         'special_needs': getattr(attendee.hotel_requests, 'special_needs', ''),
         'wanted_roommates': getattr(attendee.hotel_requests, 'wanted_roommates', ''),
         'unwanted_roommates': getattr(attendee.hotel_requests, 'unwanted_roommates', ''),
