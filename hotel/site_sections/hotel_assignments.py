@@ -282,6 +282,7 @@ def _attendee_dict(attendee):
         'multiply_assigned': len(attendee.room_assignments) > 1
     }
 
+
 def _room_dict(room):
     return dict({
         'id': room.id,
