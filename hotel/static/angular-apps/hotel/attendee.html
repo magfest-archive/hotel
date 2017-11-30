@@ -15,7 +15,13 @@
 </tr>
 <tr>
     <td><b>Nights Requested</b></td>
-    <td>{{ attendee.nights }}</td>
+    <td>
+      <span ng-repeat="night in attendee.nights">
+        <span ng-if="night[1]" style="color:red" title="{{ attendee.name }} does not have any shifts assigned for {{ night[0] }}">{{ night[0] }}</span>
+        <span ng-if="!night[1]">{{ night[0] }}</span>
+        {{$last ? '' : ' / '}}
+      </span>
+    </td>
 </tr>
 <tr>
     <td><b>Departments</b></td>

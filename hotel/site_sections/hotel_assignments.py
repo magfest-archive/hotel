@@ -259,11 +259,20 @@ class Root:
             out.writerow([a.legal_first_name, a.legal_last_name, a.email, a.hotel_pin])
 
 
+def _attendee_nights(attendee):
+    discrepancies = attendee.hotel_nights_without_shifts_that_day
+    nights = []
+    if attendee.hotel_requests:
+        for night in sorted(attendee.hotel_requests.nights_ints, key=c.NIGHT_DISPLAY_ORDER.index):
+            nights.append((c.NIGHTS[night], night in discrepancies))
+    return nights
+
+
 def _attendee_dict(attendee):
     return {
         'id': attendee.id,
         'name': attendee.full_name,
-        'nights': getattr(attendee.hotel_requests, 'nights_display', ''),
+        'nights': _attendee_nights(attendee),
         'special_needs': getattr(attendee.hotel_requests, 'special_needs', ''),
         'wanted_roommates': getattr(attendee.hotel_requests, 'wanted_roommates', ''),
         'unwanted_roommates': getattr(attendee.hotel_requests, 'unwanted_roommates', ''),
@@ -272,7 +281,6 @@ def _attendee_dict(attendee):
         'nights_lookup': {night: getattr(attendee.hotel_requests, night, False) for night in c.NIGHT_NAMES},
         'multiply_assigned': len(attendee.room_assignments) > 1
     }
-
 
 def _room_dict(room):
     return dict({
@@ -292,7 +300,8 @@ def _get_declined(session):
         .options(
             subqueryload(Attendee.hotel_requests),
             subqueryload(Attendee.assigned_depts),
-            subqueryload(Attendee.room_assignments)) \
+            subqueryload(Attendee.room_assignments),
+            subqueryload(Attendee.shifts).subqueryload(Shift.job)) \
         .filter(
             Attendee.hotel_requests != None,
             HotelRequests.nights == '',
@@ -306,7 +315,8 @@ def _get_unconfirmed(session, assigned_ids):
         .options(
             subqueryload(Attendee.hotel_requests),
             subqueryload(Attendee.assigned_depts),
-            subqueryload(Attendee.room_assignments)) \
+            subqueryload(Attendee.room_assignments),
+            subqueryload(Attendee.shifts).subqueryload(Shift.job)) \
         .filter(
             Attendee.hotel_eligible == True,
             Attendee.hotel_requests == None,
@@ -320,7 +330,8 @@ def _get_unassigned(session, assigned_ids):
         .options(
             subqueryload(Attendee.hotel_requests),
             subqueryload(Attendee.assigned_depts),
-            subqueryload(Attendee.room_assignments)) \
+            subqueryload(Attendee.room_assignments),
+            subqueryload(Attendee.shifts).subqueryload(Shift.job)) \
         .filter(
             Attendee.hotel_requests != None,
             HotelRequests.nights != '',
@@ -339,7 +350,10 @@ def _hotel_dump(session):
                 .subqueryload(Attendee.assigned_depts),
         subqueryload(Room.assignments)
             .subqueryload(RoomAssignment.attendee)
-                .subqueryload(Attendee.room_assignments)) \
+                .subqueryload(Attendee.room_assignments),
+        subqueryload(Room.assignments)
+            .subqueryload(RoomAssignment.attendee)
+                .subqueryload(Attendee.shifts).subqueryload(Shift.job)) \
         .order_by(Room.locked_in.desc(), Room.created)
 
     rooms = [_room_dict(room) for room in room_query.all()]

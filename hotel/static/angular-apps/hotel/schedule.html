@@ -18,7 +18,14 @@
         <table>
             <tr ng-repeat="attendee in room.attendees">
                 <td valign="center"> <a href="#/attendee/{{ attendee.id }}">{{ attendee.name }}</a> </td>
-                <td valign="center"> &nbsp; {{ attendee.nights }} </td>
+                <td valign="center">
+                  &nbsp;
+                  <span ng-repeat="night in attendee.nights">
+                    <span ng-if="night[1]" style="color:red" title="{{ attendee.name }} does not have any shifts assigned for {{ night[0] }}">{{ night[0] }}</span>
+                    <span ng-if="!night[1]">{{ night[0] }}</span>
+                    {{$last ? '' : ' / '}}
+                  </span>
+                </td>
                 <td valign="center"> &nbsp; <a href="goto_staffer_requests?id={{ attendee.id }}">Edit</a> </td>
                 <td valign="center"> &nbsp; <button ng-click="remove(attendee.id, room.id)">Remove</button> </td>
                 <td>
@@ -41,7 +48,12 @@
     <td valign="top">
         <br/> <b>{{ unassigned.length }} Unassigned Attendees</b>
         <div ng-repeat="attendee in lists.unassigned">
-            <a href="#/attendee/{{ attendee.id }}">{{ attendee.name }}</a> ({{ attendee.nights }})
+            <a href="#/attendee/{{ attendee.id }}">{{ attendee.name }}</a>
+            (<span ng-repeat="night in attendee.nights">
+              <span ng-if="night[1]" style="color:red" title="{{ attendee.name }} does not have any shifts assigned for {{ night[0] }}">{{ night[0] }}</span>
+              <span ng-if="!night[1]">{{ night[0] }}</span>
+              {{$last ? '' : ' / '}}
+            </span>)
         </div>
     </td>
     <td valign="top">
