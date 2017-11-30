@@ -202,6 +202,20 @@ class Attendee:
         except:
             return []
 
+    @property
+    def hotel_nights_without_shifts_that_day(self):
+        if not self.hotel_requests:
+            return []
+
+        hotel_nights = set(self.hotel_requests.nights_ints)
+        shift_nights = set()
+        for shift in self.shifts:
+            start_time = shift.job.start_time.astimezone(c.EVENT_TIMEZONE)
+            shift_night = getattr(c, start_time.strftime('%A').upper())
+            shift_nights.add(shift_night)
+        discrepancies = hotel_nights.difference(shift_nights)
+        return list(sorted(discrepancies, key=c.NIGHT_DISPLAY_ORDER.index))
+
     @cached_property
     def hotel_status(self):
         hr = self.hotel_requests
