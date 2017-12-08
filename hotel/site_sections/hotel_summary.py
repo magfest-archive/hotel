@@ -108,4 +108,4 @@ class Root:
 
         out.writerow(['Department', 'Attendee', 'Attendee Email', 'Inconsistent Nights'])
         for row in rows:
-            out.writerow(row)
+            out.writerow(row[:-1])
