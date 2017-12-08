@@ -39,7 +39,7 @@ def _inconsistent_shoulder_shifts(session):
             shift_night = getattr(c, start_time.strftime('%A').upper())
             shifts_by_night[shift_night].append(shift)
 
-            if start_time < noon_datetime(start_time):
+            if start_time <= noon_datetime(start_time):
                 day_before = start_time - timedelta(days=1)
                 shift_night = getattr(c, day_before.strftime('%A').upper())
                 shifts_by_night[shift_night].append(shift)
@@ -109,4 +109,4 @@ class Root:
 
         out.writerow(['Department', 'Attendee', 'Attendee Email', 'Inconsistent Nights'])
         for row in rows:
-            out.writerow(row[:-1])
+            out.writerow(row)
