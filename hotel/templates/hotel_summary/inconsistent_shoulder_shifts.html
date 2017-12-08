@@ -16,7 +16,7 @@
         <tr>
           <th>Attendee</th>
           <th>Email</th>
-          <th>Assigned Depts</th>
+          <th>Depts Where Working</th>
           <th>Shoulder Nights Without Shifts</th>
         </tr>
       </thead>
@@ -25,7 +25,7 @@
           <tr>
             <td>{{ attendee|form_link }}</td>
             <td>{{ attendee.email|email_to_link }}</td>
-            <td>{{ attendee.assigned_depts_labels|join(" / ") }}</td>
+            <td>{{ attendee.depts_where_working|map(attribute="name")|join(" / ") }}</td>
             <td>{{ attendee.night_names }}</td>
           </tr>
         {% endfor %}

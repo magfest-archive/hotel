@@ -16,6 +16,7 @@ def noon_datetime(dt):
 def _inconsistent_shoulder_shifts(session):
     query = session.query(Attendee).join(HotelRequests) \
         .options(
+            subqueryload(Attendee.depts_where_working),
             subqueryload(Attendee.shifts).subqueryload(Shift.job).subqueryload(Job.department),
             subqueryload(Attendee.hotel_requests)) \
         .filter(HotelRequests.approved == True)
