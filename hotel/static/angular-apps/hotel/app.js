@@ -1,4 +1,27 @@
 angular.module('hotel', ['ngRoute', 'magfest'])
+    .directive("keepScrollController", function($route, $timeout, $location) {
+        var cache = {};
+        return {
+            restrict : 'A',
+            link: function($scope, elements, attrs) {
+                $scope.$on('$routeChangeStart', function() {
+                    if(!attrs.keepScrollController || attrs.keepScrollController.indexOf($route.current.controller) !== -1) {
+                        cache[$route.current.controller] = [$(window).scrollLeft(), $(window).scrollTop()];
+                    }
+                });
+
+                $scope.$on('$routeChangeSuccess', function() {
+                    var pos = cache[$route.current.controller];
+                    if(pos) {
+                        $timeout(function() {
+                            $(window).scrollLeft(pos[0]);
+                            $(window).scrollTop(pos[1]);
+                        }, 0);
+                    }
+                });
+            }
+        }
+    })
     .service('errorHandler', function () {
         return function () {
             alert('I AM ERROR');  // TODO: better error handling
