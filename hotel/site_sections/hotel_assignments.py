@@ -5,7 +5,6 @@ from hotel.models import _generate_hotel_pin
 @all_renderable(c.STAFF_ROOMS)
 class Root:
     def index(self, session):
-        attendee = session.admin_attendee()
         three_days_before = (c.EPOCH - timedelta(days=3)).strftime('%A')
         two_days_before = (c.EPOCH - timedelta(days=2)).strftime('%A')
         day_before = (c.EPOCH - timedelta(days=1)).strftime('%A')
@@ -260,15 +259,15 @@ class Root:
 
 
 def _attendee_nights_without_shifts(attendee):
-    discrepancies = attendee.hotel_nights_without_shifts_that_day
     nights = []
     if attendee.hotel_requests:
+        discrepancies = attendee.hotel_nights_without_shifts_that_day
         for night in sorted(attendee.hotel_requests.nights_ints, key=c.NIGHT_DISPLAY_ORDER.index):
             nights.append((c.NIGHTS[night], night in discrepancies))
     return nights
 
 
-def _attendee_dict(attendee):
+def _attendee_dict(attendee, verbose=False):
     return {
         'id': attendee.id,
         'name': attendee.full_name,
@@ -297,8 +296,8 @@ def _room_dict(room):
     })
 
 
-def _get_declined(session):
-    query = session.query(Attendee).join(Attendee.hotel_requests) \
+def _get_confirmed(session):
+    attendee_query = session.query(Attendee) \
         .options(
             subqueryload(Attendee.hotel_requests),
             subqueryload(Attendee.assigned_depts),
@@ -306,14 +305,13 @@ def _get_declined(session):
             subqueryload(Attendee.shifts).subqueryload(Shift.job)) \
         .filter(
             Attendee.hotel_requests != None,
-            HotelRequests.nights == '',
             Attendee.badge_status.in_([c.NEW_STATUS, c.COMPLETED_STATUS])) \
         .order_by(Attendee.full_name, Attendee.id)
-    return [_attendee_dict(a) for a in query]
+    return attendee_query
 
 
-def _get_unconfirmed(session, assigned_ids):
-    query = session.query(Attendee) \
+def _get_unconfirmed(session):
+    attendee_query = session.query(Attendee) \
         .options(
             subqueryload(Attendee.hotel_requests),
             subqueryload(Attendee.assigned_depts),
@@ -324,22 +322,7 @@ def _get_unconfirmed(session, assigned_ids):
             Attendee.hotel_requests == None,
             Attendee.badge_status.in_([c.NEW_STATUS, c.COMPLETED_STATUS])) \
         .order_by(Attendee.full_name, Attendee.id)
-    return [_attendee_dict(a) for a in query if a.id not in assigned_ids]
-
-
-def _get_unassigned(session, assigned_ids):
-    query = session.query(Attendee).join(Attendee.hotel_requests) \
-        .options(
-            subqueryload(Attendee.hotel_requests),
-            subqueryload(Attendee.assigned_depts),
-            subqueryload(Attendee.room_assignments),
-            subqueryload(Attendee.shifts).subqueryload(Shift.job)) \
-        .filter(
-            Attendee.hotel_requests != None,
-            HotelRequests.nights != '',
-            Attendee.badge_status.in_([c.NEW_STATUS, c.COMPLETED_STATUS])) \
-        .order_by(Attendee.full_name, Attendee.id)
-    return [_attendee_dict(a) for a in query if a.id not in assigned_ids]
+    return attendee_query
 
 
 def _hotel_dump(session):
@@ -358,15 +341,31 @@ def _hotel_dump(session):
                 .subqueryload(Attendee.shifts).subqueryload(Shift.job)) \
         .order_by(Room.locked_in.desc(), Room.created)
 
-    rooms = [_room_dict(room) for room in room_query.all()]
+    rooms = [_room_dict(room) for room in room_query]
+
     assigned = sum([r['attendees'] for r in rooms], [])
-    assigned_ids = [a['id'] for a in assigned]
-    unassigned = _get_unassigned(session, assigned_ids)
+    assigned_ids = set([a['id'] for a in assigned])
+
+    declined = []
+    unassigned = []
+    for attendee in _get_confirmed(session):
+        if attendee.hotel_requests.nights == '':
+            declined.append(_attendee_dict(attendee))
+        elif attendee.id not in assigned_ids:
+            unassigned.append(_attendee_dict(attendee))
+
+    unconfirmed = []
+    for attendee in _get_unconfirmed(session):
+        if attendee.id not in assigned_ids:
+            unconfirmed.append(_attendee_dict(attendee))
+
+    eligible = sorted(assigned + unassigned, key=lambda a: a['name'])
+
     return {
         'rooms': rooms,
         'assigned': assigned,
         'unassigned': unassigned,
-        'declined': _get_declined(session),
-        'unconfirmed': _get_unconfirmed(session, assigned_ids),
-        'eligible': sorted(assigned + unassigned, key=lambda a: a['name'])
+        'declined': declined,
+        'unconfirmed': unconfirmed,
+        'eligible': eligible
     }
